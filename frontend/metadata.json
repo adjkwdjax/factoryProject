@@ -1,0 +1,6 @@
+{
+  "name": "FactoryFlow Manger",
+  "description": "Factory management dashboard with Admin and Worker roles, task tracking, equipment monitoring, and incident reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
