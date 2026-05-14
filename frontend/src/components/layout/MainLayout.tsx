@@ -20,7 +20,7 @@ export function Sidebar({ currentNav, onNavigate }: { currentNav: string, onNavi
     { id: 'dashboard', label: 'Отчеты и Информационная панель', icon: LayoutDashboard },
     { id: 'tasks', label: 'Управление задачами', icon: CheckSquare },
     { id: 'equipment', label: 'Оборудование', icon: Wrench },
-    { id: 'users', label: 'Сотрудники и Цехи', icon: Users },
+    { id: 'users', label: 'Сотрудники и подразделения', icon: Users },
     { id: 'messages', label: 'Сообщения', icon: MessageSquare },
     { id: 'incidents', label: 'Инциденты и Аварии', icon: AlertOctagon },
   ];
@@ -46,7 +46,7 @@ export function Sidebar({ currentNav, onNavigate }: { currentNav: string, onNavi
           <div className="overflow-hidden">
             <div className="text-sm font-bold text-slate-200 truncate">{currentUser.name}</div>
             <div className="text-[10px] text-blue-400 uppercase tracking-widest font-bold truncate mt-0.5">
-               {currentUser.role === 'ADMIN' ? 'Начальник цеха' : 'Работник'}
+               {currentUser.role === 'ADMIN' ? 'Начальник подразделения' : 'Работник'}
             </div>
           </div>
         </div>

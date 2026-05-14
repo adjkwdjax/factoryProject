@@ -45,7 +45,7 @@ export function WorkerEquipment() {
             <div className="p-2 bg-slate-800 rounded-lg">
                <Wrench className="w-5 h-5 text-slate-400" />
             </div>
-            Техника и Агрегаты: {currentDept?.name || 'Мой Цех'}
+            Техника и Агрегаты: {currentDept?.name || 'Моё подразделение'}
          </h1>
       </div>
 

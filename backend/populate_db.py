@@ -24,9 +24,9 @@ def create_initial_data():
 
     # Create departments
     print("Creating departments...")
-    dept1 = Department.objects.create(name='Цех сборки')
-    dept2 = Department.objects.create(name='Литейный цех')
-    dept3 = Department.objects.create(name='Упаковочный цех')
+    dept1 = Department.objects.create(name='Подразделение сборки')
+    dept2 = Department.objects.create(name='Литейное подразделение')
+    dept3 = Department.objects.create(name='Упаковочное подразделение')
 
     # Create users
     print("Creating users...")

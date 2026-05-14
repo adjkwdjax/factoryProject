@@ -58,9 +58,9 @@ export interface Message {
 }
 
 export const mockDepartments: Department[] = [
-  { id: 'd1', name: 'Цех сборки' },
-  { id: 'd2', name: 'Литейный цех' },
-  { id: 'd3', name: 'Упаковочный цех' },
+  { id: 'd1', name: 'Подразделение сборки' },
+  { id: 'd2', name: 'Литейное подразделение' },
+  { id: 'd3', name: 'Упаковочное подразделение' },
 ];
 
 export const mockUsers: User[] = [

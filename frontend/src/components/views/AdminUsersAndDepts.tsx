@@ -44,14 +44,14 @@ export function AdminUsersAndDepts() {
       {/* Departments Section */}
       <section className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden shadow-sm">
         <div className="p-6 border-b border-slate-800 flex justify-between items-center z-10">
-          <h2 className="text-xl font-semibold text-slate-100">Подразделения (Цеха)</h2>
+          <h2 className="text-xl font-semibold text-slate-100">Подразделения</h2>
           <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">{departments.length}</span>
         </div>
         
         <div className="p-5 border-b border-slate-800 bg-slate-900/50 z-10">
           <form onSubmit={e => { e.preventDefault(); handleAddDept(); }} className="flex gap-3">
             <Input 
-              placeholder="Название нового цеха" 
+              placeholder="Название нового подразделения" 
               value={newDeptName} 
               onChange={e => setNewDeptName(e.target.value)} 
               className="bg-slate-950 border-slate-700 h-[42px]"
@@ -96,12 +96,12 @@ export function AdminUsersAndDepts() {
             />
             <div className="flex flex-col sm:flex-row gap-3">
               <Select className="flex-1 bg-slate-950 border-slate-700 text-sm" value={newUser.departmentId} onChange={e => setNewUser({...newUser, departmentId: e.target.value})}>
-                <option value="">Выберите цех...</option>
+                <option value="">Выберите подразделение...</option>
                 {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </Select>
               <Select className="flex-1 bg-slate-950 border-slate-700 text-sm" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as any})}>
                 <option value="WORKER">Работник</option>
-                <option value="ADMIN">Начальник цеха</option>
+                <option value="ADMIN">Начальник подразделения</option>
               </Select>
             </div>
             <Button onClick={handleAddUser} disabled={!newUser.name || !newUser.departmentId} className="w-full mt-1 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/20 uppercase tracking-widest text-xs font-bold">

@@ -60,9 +60,9 @@ export function AdminEquipment() {
               <Input value={newEq.name} onChange={e => setNewEq({...newEq, name: e.target.value})} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Цех</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Подразделение</label>
               <Select value={newEq.departmentId} onChange={e => setNewEq({...newEq, departmentId: e.target.value})}>
-                <option value="">Выберите цех...</option>
+                <option value="">Выберите подразделение...</option>
                 {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </Select>
             </div>
