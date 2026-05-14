@@ -1,5 +1,3 @@
-## 🌟 Особенности
-
 - ✅ **Управление задачами**: создание, редактирование, отслеживание статуса
 - ✅ **Учет оборудования**: регистрация, отслеживание сроков эксплуатации, статуса
 - ✅ **Управление персоналом**: создание профилей, распределение по цехам, назначение ролей
@@ -8,7 +6,7 @@
 - ✅ **Аналитика**: информационная панель с ключевыми метриками
 - ✅ **Роль-базированный доступ**: разные возможности для администраторов и рабочих
 
-## 🛠️ Технический стек
+## Стек
 
 ### Бекенд
 - **Django 5.2** - веб-фреймворк
@@ -30,12 +28,12 @@
 - PostgreSQL 12+
 - npm 8+
 
-## 🚀 Быстрый старт
+## Запуск
 
 ### 1. Подготовка БД PostgreSQL
 
 ```bash
-# Создать БД и пользователя (от администратора PostgreSQL)
+# Создать БД и пользователя
 psql -U postgres -c "CREATE DATABASE workshop_db;"
 psql -U postgres -c "CREATE USER workshop_admin WITH PASSWORD '12345';"
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE workshop_db TO workshop_admin;"
@@ -47,9 +45,9 @@ psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE workshop_db TO workshop_ad
 cd backend
 
 # Windows
-.venv\Scripts\python manage.py migrate
-.venv\Scripts\python populate_db.py
-.venv\Scripts\python manage.py runserver 0.0.0.0:8000
+python manage.py migrate
+python populate_db.py
+python manage.py runserver 0.0.0.0:8000
 ```
 
 **Бекенд будет доступен по адресу**: `http://localhost:8000`
@@ -59,32 +57,25 @@ cd backend
 ```bash
 cd frontend
 
-# Установить зависимости (если еще не установлены)
+# Установить зависимости
 npm install
 
-# Запустить development сервер
+# Запустить сервер
 npm run dev
 ```
 
 **Фронтенд будет доступен по адресу**: `http://localhost:3000`
 
-### 4. Открыть приложение
-
-Откройте браузер и перейдите на `http://localhost:3000`
-
-## 🔐 Учетные данные для входа
+## Учетные данные для входа
 
 ### Администратор
 - **Имя пользователя**: test_admin1
 - **Пароль**: password123
-- **Роль**: ADMIN
 
 ### Рабочие
 - **test_worker1** / password123
 - **test_worker2** / password123
 - **test_worker3** / password123
-
-Или просто выберите пользователя из выпадающего списка в приложении (для demo режима).
 
 ## 📁 Структура проекта
 
