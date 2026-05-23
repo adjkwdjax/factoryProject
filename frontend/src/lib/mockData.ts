@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'WORKER';
+export type Role = 'ADMIN' | 'DEPARTMENT_HEAD' | 'WORKER';
 
 export interface User {
   id: string;
@@ -18,6 +18,7 @@ export interface Equipment {
   expirationDate: string;
   status: 'OPERATIONAL' | 'BROKEN' | 'EXPIRED';
   departmentId: string;
+  photo?: string | null;
 }
 
 export interface Comment {
@@ -34,8 +35,11 @@ export interface Task {
   assigneeId: string;
   creatorId: string;
   dueDate: string;
+  durationHours?: number;
   status: 'PENDING' | 'COMPLETED';
   comments: Comment[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Incident {
@@ -65,6 +69,7 @@ export const mockDepartments: Department[] = [
 
 export const mockUsers: User[] = [
   { id: 'u1', name: 'Иванов Иван (Начальник)', role: 'ADMIN', departmentId: 'd1' },
+  { id: 'u5', name: 'Кузнецов Константин (Начальник подразделения)', role: 'DEPARTMENT_HEAD', departmentId: 'd1' },
   { id: 'u2', name: 'Петров Петр (Сборщик)', role: 'WORKER', departmentId: 'd1' },
   { id: 'u3', name: 'Сидоров Сидор (Сварщик)', role: 'WORKER', departmentId: 'd2' },
   { id: 'u4', name: 'Алексеев Алексей (Сборщик)', role: 'WORKER', departmentId: 'd1' },
@@ -84,6 +89,7 @@ export const mockTasks: Task[] = [
     assigneeId: 'u2',
     creatorId: 'u1',
     dueDate: '2026-05-11',
+    durationHours: 6,
     status: 'PENDING',
     comments: [
       { id: 'c1', authorId: 'u1', text: 'Обратите внимание на допуски.', timestamp: '2026-05-10T08:00:00Z' }
@@ -96,6 +102,7 @@ export const mockTasks: Task[] = [
     assigneeId: 'u3',
     creatorId: 'u1',
     dueDate: '2026-05-09',
+    durationHours: 3,
     status: 'COMPLETED',
     comments: [],
   },
@@ -106,6 +113,7 @@ export const mockTasks: Task[] = [
     assigneeId: 'u2',
     creatorId: 'u1',
     dueDate: '2026-05-12',
+    durationHours: 4,
     status: 'COMPLETED',
     comments: [],
   }

@@ -48,6 +48,15 @@ def create_initial_data():
     )
     UserProfile.objects.create(user=user2, role='WORKER', department=dept1)
 
+    user_head = User.objects.create_user(
+        username='test_head1',
+        first_name='Кузнецов',
+        last_name='Константин',
+        email='head1@factory.com',
+        password='password123'
+    )
+    UserProfile.objects.create(user=user_head, role='DEPARTMENT_HEAD', department=dept1)
+
     user3 = User.objects.create_user(
         username='test_worker2',
         first_name='Сидоров',
@@ -95,6 +104,7 @@ def create_initial_data():
         assignee=user2,
         creator=user1,
         due_date=timezone.now() + timedelta(days=1),
+        duration_hours=6,
         status='PENDING'
     )
     Comment.objects.create(
@@ -109,6 +119,7 @@ def create_initial_data():
         assignee=user3,
         creator=user1,
         due_date=timezone.now() - timedelta(days=1),
+        duration_hours=3,
         status='COMPLETED'
     )
 
@@ -118,6 +129,7 @@ def create_initial_data():
         assignee=user2,
         creator=user1,
         due_date=timezone.now() + timedelta(days=2),
+        duration_hours=4,
         status='COMPLETED'
     )
 

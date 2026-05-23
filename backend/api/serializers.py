@@ -86,6 +86,7 @@ class TaskSerializer(serializers.ModelSerializer):
     assigneeId = serializers.SerializerMethodField()
     creatorId = serializers.SerializerMethodField()
     dueDate = serializers.DateTimeField(source='due_date')
+    durationHours = serializers.IntegerField(source='duration_hours', required=False, allow_null=True)
 
     def get_assigneeId(self, obj):
         return obj.assignee.id if obj.assignee else None
@@ -98,7 +99,8 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'assignee', 'creator',
             'assignee_id', 'creator_id', 'assigneeId', 'creatorId',
-            'due_date', 'dueDate', 'status', 'comments', 'created_at', 'updated_at'
+            'due_date', 'dueDate', 'duration_hours', 'durationHours',
+            'status', 'comments', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -120,7 +122,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipment
         fields = [
-            'id', 'name', 'expirationDate', 'status',
+            'id', 'name', 'expirationDate', 'status', 'photo',
             'department', 'department_id', 'departmentId', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

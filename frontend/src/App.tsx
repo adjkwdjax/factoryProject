@@ -19,11 +19,11 @@ function AppContent() {
 
   // Set initial route based on role
   if (!currentNav && currentUser) {
-    setCurrentNav(currentUser.role === 'ADMIN' ? 'dashboard' : 'my-tasks');
+    setCurrentNav(currentUser.role === 'WORKER' ? 'my-tasks' : 'dashboard');
   }
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400 font-bold uppercase tracking-widest text-sm">Загрузка портала завода...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">Загрузка портала завода...</div>;
   }
 
   if (!currentUser) {

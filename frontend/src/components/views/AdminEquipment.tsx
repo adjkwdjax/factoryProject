@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { Input, Select } from '../ui/Input';
 import { api } from '../../services/api';
 import { Department, Equipment } from '../../lib/mockData';
-import { Plus, AlertTriangle, CheckCircle, Flame } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle, Flame, Upload } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 
 export function AdminEquipment() {
@@ -13,6 +13,7 @@ export function AdminEquipment() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [newEq, setNewEq] = useState({ name: '', expirationDate: '', departmentId: '' });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   const loadData = async () => {
     const [e, d] = await Promise.all([api.getEquipment(), api.getDepartments()]);
@@ -35,9 +36,11 @@ export function AdminEquipment() {
     if (!newEq.name || !newEq.expirationDate || !newEq.departmentId) return;
     await api.addEquipment({
       ...newEq,
+      photoFile,
       status: 'OPERATIONAL'
     });
     setNewEq({ name: '', expirationDate: '', departmentId: '' });
+    setPhotoFile(null);
     loadData();
   };
 
@@ -45,16 +48,16 @@ export function AdminEquipment() {
 
   return (
     <div className="space-y-6 flex flex-col flex-1">
-      <div className="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
-         <h1 className="text-xl font-semibold text-slate-100">Учет оборудования</h1>
+      <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <h1 className="text-xl font-semibold text-slate-900">Учет оборудования</h1>
       </div>
       
-      <Card className="bg-slate-900/80 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardContent className="p-6">
-          <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-wider flex items-center gap-2">
-             <Plus className="w-4 h-4" /> ДОБАВИТЬ АГРЕГАТ
+          <h3 className="text-sm font-bold text-amber-700 mb-4 uppercase tracking-wider flex items-center gap-2">
+             <Plus className="w-4 h-4" /> ДОБАВИТЬ ОБОРУДОВАНИЕ
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Наименование</label>
               <Input value={newEq.name} onChange={e => setNewEq({...newEq, name: e.target.value})} />
@@ -67,8 +70,12 @@ export function AdminEquipment() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Срок эксплуатации</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Окончание срока эксплуатации</label>
               <Input type="date" value={newEq.expirationDate} onChange={e => setNewEq({...newEq, expirationDate: e.target.value})} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Фото</label>
+              <Input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
             </div>
             <Button className="w-full" onClick={handleAdd} disabled={!newEq.name || !newEq.expirationDate || !newEq.departmentId}>
               Добавить
@@ -77,8 +84,8 @@ export function AdminEquipment() {
         </CardContent>
       </Card>
 
-      <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col flex-1 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-100 mb-6">Текущее состояние парка</h3>
+      <section className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col flex-1 shadow-sm">
+        <h3 className="text-lg font-semibold text-slate-900 mb-6">Текущее оборудование</h3>
         <div className="grid grid-cols-1 gap-4 overflow-y-auto custom-scrollbar min-h-0">
           {equipment.map(eq => {
             const dept = departments.find(d => d.id === eq.departmentId);
@@ -91,31 +98,38 @@ export function AdminEquipment() {
                 className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                   isBroken ? 'bg-red-500/5 border-red-500/20' : 
                   isExpired ? 'bg-orange-500/5 border-orange-500/20' : 
-                  'bg-slate-950 border-slate-800'
+                  'bg-slate-50 border-slate-200'
                 }`}
               >
                 <div className="flex justify-between items-center gap-4 w-full">
                   <div className="flex items-center gap-4">
+                    {eq.photo ? (
+                      <img src={eq.photo} alt={eq.name} className="w-14 h-14 rounded-xl object-cover border border-slate-200" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-500 text-[10px] uppercase tracking-widest">
+                        Фото
+                      </div>
+                    )}
                     <div className={`p-2 rounded-lg ${
-                      isBroken ? 'bg-red-500/20 text-red-500' : 
-                      isExpired ? 'bg-orange-500/20 text-orange-400' : 
-                      'bg-slate-800 text-slate-500'
+                      isBroken ? 'bg-red-100 text-red-600' : 
+                      isExpired ? 'bg-amber-100 text-amber-700' : 
+                      'bg-slate-100 text-slate-500'
                     }`}>
                       {isBroken ? <Flame className="w-5 h-5" /> : 
                        isExpired ? <AlertTriangle className="w-5 h-5" /> : 
                        <CheckCircle className="w-5 h-5" />}
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-200 text-sm">{eq.name}</div>
+                      <div className="font-semibold text-slate-900 text-sm">{eq.name}</div>
                       <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
                         Локация: {dept?.name || 'Неизвестно'} • Истекает: {format(new Date(eq.expirationDate), 'dd.MM.yyyy')}
                       </div>
                     </div>
                   </div>
                   <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
-                      isBroken ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 
-                      isExpired ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 
-                      'bg-slate-800 text-slate-400 border border-slate-700'
+                       isBroken ? 'bg-red-100 text-red-700 border border-red-200' : 
+                       isExpired ? 'bg-amber-100 text-amber-700 border border-amber-200' : 
+                       'bg-slate-100 text-slate-600 border border-slate-200'
                    }`}>
                      {isBroken ? 'Критично' : isExpired ? 'Требует ТО' : 'Исправно'}
                    </span>

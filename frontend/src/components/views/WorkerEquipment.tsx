@@ -11,6 +11,7 @@ export function WorkerEquipment() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [popUpisOpen, setPopUpIsOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -40,21 +41,21 @@ export function WorkerEquipment() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-6">
-         <h1 className="text-xl font-semibold text-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-slate-800 rounded-lg">
-               <Wrench className="w-5 h-5 text-slate-400" />
+      <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-6">
+        <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
+          <div className="p-2 bg-slate-100 rounded-lg">
+            <Wrench className="w-5 h-5 text-slate-500" />
             </div>
-            Техника и Агрегаты: {currentDept?.name || 'Моё подразделение'}
+            Оборудование: {currentDept?.name || 'Моё подразделение'}
          </h1>
       </div>
 
       {expiredEq.length > 0 && (
-        <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 flex gap-4">
-          <AlertTriangle className="w-6 h-6 text-orange-400 shrink-0" />
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 flex gap-4">
+          <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0" />
           <div>
-             <h3 className="font-bold text-orange-400 text-sm uppercase tracking-widest mb-1">Оборудование требует ТО</h3>
-             <p className="text-orange-500/80 text-xs text-medium">Агрегаты ({expiredEq.length} ед.) имеют истекший срок эксплуатации.</p>
+             <h3 className="font-bold text-amber-400 text-sm uppercase tracking-widest mb-1">Оборудование требует ТО</h3>
+             <p className="text-amber-500/80 text-xs text-medium">Агрегаты ({expiredEq.length} ед.) имеют истекший срок эксплуатации.</p>
           </div>
         </div>
       )}
@@ -68,34 +69,37 @@ export function WorkerEquipment() {
             <Card 
               key={eq.id} 
               className={`
-                bg-slate-900 border transition-all hover:bg-slate-900/80
+                bg-white border transition-all hover:bg-slate-50
                 ${isBroken ? 'border-red-500/30' : ''} 
-                ${isExpired ? 'border-orange-500/30' : 'border-slate-800'}
+                 ${isExpired ? 'border-amber-200' : 'border-slate-200'}
               `}
             >
-              <CardContent className="p-6 flex items-start gap-4">
+              <CardContent className="p-6 flex items-start gap-4 flex-col">
+                  {eq.photo ? (
+                      <img src={eq.photo} alt={eq.name} className="w-32 h-32 rounded-xl object-cover border border-slate-200"/>
+                  ) : null}
                  <div className={`p-3 rounded-xl ${
-                    isBroken ? 'bg-red-500/10 text-red-500' : 
-                    isExpired ? 'bg-orange-500/10 text-orange-400' : 
-                    'bg-slate-800 text-slate-400'
+                      isBroken ? 'bg-red-100 text-red-600' : 
+                    isExpired ? 'bg-amber-100 text-amber-700' : 
+                      'bg-slate-100 text-slate-600'
                   }`}>
                     {isBroken ? <Flame className="w-6 h-6" /> : 
                      isExpired ? <AlertTriangle className="w-6 h-6" /> : 
                      <Wrench className="w-6 h-6" />}
                   </div>
                   <div>
-                    <h4 className="text-[15px] font-semibold text-slate-100">{eq.name}</h4>
+                    <h4 className="text-[15px] font-semibold text-slate-900">{eq.name}</h4>
                     <p className="text-[10px] uppercase tracking-widest font-bold mt-1.5 flex items-center gap-1.5">
                       Статус: {' '}
                       <span className={`
                          px-1.5 py-0.5 rounded
-                         ${isBroken ? 'bg-red-500/20 text-red-500' : 
-                           isExpired ? 'bg-orange-500/20 text-orange-400' : 'bg-slate-800 text-slate-400'}
+                          ${isBroken ? 'bg-red-100 text-red-700' : 
+                            isExpired ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}
                       `}>
                          {isBroken ? 'КРИТИЧНО' : isExpired ? 'ТРЕБУЕТ ТО' : 'ИСПРАВНО'}
                       </span>
                     </p>
-                    <p className={`text-[10px] uppercase tracking-widest font-bold mt-2 ${isExpired ? 'text-orange-400' : 'text-slate-500'}`}>
+                    <p className={`text-[10px] uppercase tracking-widest font-bold mt-2 ${isExpired ? 'text-amber-700' : 'text-slate-500'}`}>
                       Истекает: {format(new Date(eq.expirationDate), 'dd.MM')}
                     </p>
                   </div>

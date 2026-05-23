@@ -1,6 +1,6 @@
 import { Task, User, Equipment, Incident, Message, Department } from '../lib/mockData';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const CSRF_HEADER_NAME = 'X-CSRFToken';
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
@@ -198,6 +198,34 @@ export const api = {
     });
   },
 
+  updateUser: async (id: string, user: Partial<User> & { name?: string }): Promise<User> => {
+    const name = user.name || '';
+    const parts = name.trim().split(/\s+/);
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ') || '';
+
+    const payload: any = {
+      first_name: firstName,
+      last_name: lastName,
+      profile: {
+        role: user.role || 'WORKER',
+        department_id: user.departmentId || '',
+      },
+    };
+
+    return fetchData(`${API_BASE_URL}/users/${id}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteUser: async (id: string): Promise<void> => {
+    await fetchData(`${API_BASE_URL}/users/${id}/`, {
+      method: 'DELETE',
+    });
+  },
+
   // Departments
   getDepartments: async (): Promise<Department[]> => {
     const data = await fetchData(`${API_BASE_URL}/departments/`);
@@ -218,11 +246,19 @@ export const api = {
     return data.results || data;
   },
   
-  addEquipment: async (eq: Omit<Equipment, 'id'>): Promise<Equipment> => {
+  addEquipment: async (eq: Omit<Equipment, 'id'> & { photoFile?: File | null }): Promise<Equipment> => {
+    const formData = new FormData();
+    formData.append('name', eq.name);
+    formData.append('expirationDate', eq.expirationDate);
+    formData.append('status', eq.status);
+    formData.append('department_id', eq.departmentId);
+    if (eq.photoFile) {
+      formData.append('photo', eq.photoFile);
+    }
+
     return fetchData(`${API_BASE_URL}/equipment/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(eq),
+      body: formData,
     });
   },
 
@@ -238,6 +274,7 @@ export const api = {
       creator_id: task.creatorId,
       assignee_id: task.assigneeId,
       due_date: task.dueDate,
+      duration_hours: task.durationHours ?? 1,
     };
     return fetchData(`${API_BASE_URL}/tasks/`, {
       method: 'POST',
@@ -251,6 +288,7 @@ export const api = {
     if (updates.creatorId) payload.creator_id = updates.creatorId;
     if (updates.assigneeId) payload.assignee_id = updates.assigneeId;
     if (updates.dueDate) payload.due_date = updates.dueDate;
+    if (updates.durationHours !== undefined) payload.duration_hours = updates.durationHours;
     
     return fetchData(`${API_BASE_URL}/tasks/${id}/`, {
       method: 'PATCH',

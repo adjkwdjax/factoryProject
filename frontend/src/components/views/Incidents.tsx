@@ -63,15 +63,15 @@ export function IncidentsView() {
 
   return (
     <div className="space-y-6 flex flex-col flex-1">
-      <div className="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
-         <h1 className="text-xl font-semibold text-slate-100">Инциденты и Аварии</h1>
+      <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <h1 className="text-xl font-semibold text-slate-900">История инцидентов</h1>
       </div>
 
       {/* Report Form */}
-      <Card className="bg-slate-900/80 border-red-900/30">
+      <Card className="bg-white border-red-200">
         <CardContent className="space-y-4 p-6">
-          <h3 className="text-sm font-bold text-red-500 mb-4 uppercase tracking-wider flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" /> СООБЩИТЬ О ПРОБЛЕМЕ
+         <h3 className="text-sm font-bold text-amber-700 mb-4 uppercase tracking-wider flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" /> СООБЩИТЬ ОБ АВАРИИ
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -108,22 +108,22 @@ export function IncidentsView() {
                 placeholder="Подробно опишите что случилось..." 
                 value={form.description} 
                 onChange={e => setForm({...form, description: e.target.value})} 
-                className={form.type === 'ACCIDENT' ? 'focus:ring-red-500 border-red-500/50 bg-red-500/10' : ''}
+                className={form.type === 'ACCIDENT' ? 'focus:ring-red-500 border-red-200 bg-red-50' : ''}
               />
             </div>
           </div>
           <div className="flex justify-end mt-6">
-            <Button variant="danger" disabled={!form.description} onClick={handleSubmit}>
+              <Button variant="danger" disabled={!form.description} onClick={handleSubmit}>
               <Flame className="w-4 h-4 mr-2" />
-              Отправить срочное сообщение
+              Сообщить об аварии
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Incident Feed */}
-      <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col flex-1 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-100 mb-6">История инцидентов</h3>
+      <section className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col flex-1 shadow-sm">
+        <h3 className="text-lg font-semibold text-slate-900 mb-6">История инцидентов</h3>
         <div className="space-y-3 overflow-y-auto custom-scrollbar min-h-0">
           {incidents.map(inc => {
             const reporter = users.find(u => u.id === inc.reporterId);
@@ -135,18 +135,18 @@ export function IncidentsView() {
               <div 
                 key={inc.id} 
                 className={`p-5 rounded-2xl border transition-all ${
-                  isResolved ? 'bg-slate-950/50 border-slate-800 opacity-60' : 
-                  isCritical ? 'bg-red-500/10 border-red-500/30 shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]' : 
-                  'bg-orange-500/10 border-orange-500/30'
+                  isResolved ? 'bg-slate-50 border-slate-200 opacity-60' : 
+                  isCritical ? 'bg-red-50 border-red-200 shadow-sm' : 
+                  'bg-amber-50 border-amber-200'
                 }`}
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
                       <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase tracking-widest ${
-                        isResolved ? 'bg-slate-800 text-slate-500' : 
-                        isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' : 
-                        'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                        isResolved ? 'bg-slate-100 text-slate-500' : 
+                        isCritical ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse' : 
+                        'bg-amber-100 text-amber-700 border border-amber-200'
                       }`}>
                         {inc.type === 'ACCIDENT' ? 'АВАРИЯ' : 'ПОЛОМКА'}
                       </span>
@@ -155,18 +155,18 @@ export function IncidentsView() {
                       </span>
                     </div>
                     
-                    <p className={`text-[15px] font-medium leading-relaxed ${!isResolved && isCritical ? 'text-red-100' : 'text-slate-200'}`}>
+                    <p className={`text-[15px] font-medium leading-relaxed ${!isResolved && isCritical ? 'text-red-900' : 'text-slate-800'}`}>
                       {inc.description}
                     </p>
                     
-                    <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-4 pt-4 border-t border-slate-800/50">
-                      <p>Сообщил: <span className="text-slate-300">{reporter?.name || 'Неизвестно'}</span></p>
-                      {eq && <p className="mt-1">Оборудование: <span className="text-slate-300">{eq.name}</span></p>}
+                    <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-4 pt-4 border-t border-slate-200">
+                      <p>Сообщил: <span className="text-slate-700">{reporter?.name || 'Неизвестно'}</span></p>
+                      {eq && <p className="mt-1">Оборудование: <span className="text-slate-700">{eq.name}</span></p>}
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end justify-start gap-4">
-                    <div className={`flex items-center text-xs font-bold uppercase tracking-widest ${isResolved ? 'text-slate-500' : isCritical ? 'text-red-400' : 'text-orange-400'}`}>
+                    <div className={`flex items-center text-xs font-bold uppercase tracking-widest ${isResolved ? 'text-slate-500' : isCritical ? 'text-red-600' : 'text-amber-700'}`}>
                       {isResolved ? (
                          <><CheckCircle className="w-4 h-4 mr-1.5"/> Разрешено</>
                       ) : (
@@ -175,7 +175,7 @@ export function IncidentsView() {
                     </div>
 
                     {currentUser?.role === 'ADMIN' && !isResolved && (
-                      <Button onClick={() => handleResolve(inc.id)} className="text-xs uppercase tracking-widest font-bold bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/20">
+                      <Button onClick={() => handleResolve(inc.id)} className="text-xs uppercase tracking-widest font-bold bg-amber-600 hover:bg-amber-500 shadow-lg shadow-amber-900/20">
                         Устранено
                       </Button>
                     )}

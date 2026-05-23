@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -101,40 +102,57 @@ class UserViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
+    def _extract_profile_data(self, request):
+        profile_data = request.data.get('profile', {}) or {}
+        role = profile_data.get('role') or request.data.get('role') or 'WORKER'
+        department_id = profile_data.get('department_id') or request.data.get('department_id') or request.data.get('departmentId')
+        return role, department_id
+
+    def _sync_profile(self, user, request):
+        role, department_id = self._extract_profile_data(request)
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.role = role
+        profile.department_id = department_id or None
+        profile.save()
+
     def create(self, request, *args, **kwargs):
         """Override create to handle nested profile creation"""
-        # Extract profile data if provided
-        profile_data = request.data.get('profile', {})
-        
-        # Create user with basic fields
         user_data = {
             'username': request.data.get('username'),
             'first_name': request.data.get('first_name', ''),
             'last_name': request.data.get('last_name', ''),
             'email': request.data.get('email', ''),
         }
-        
-        # Create user
+
         user = User.objects.create_user(**user_data)
-        
-        # Create or update profile with role and department
-        department_id = profile_data.get('department_id')
-        role = profile_data.get('role', 'WORKER')
-        
-        profile, _ = UserProfile.objects.get_or_create(user=user)
-        profile.role = role
-        if department_id:
-            profile.department_id = department_id
-        profile.save()
-        
-        # Return serialized user
+        self._sync_profile(user, request)
+
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        instance.username = request.data.get('username', instance.username)
+        instance.first_name = request.data.get('first_name', instance.first_name)
+        instance.last_name = request.data.get('last_name', instance.last_name)
+        instance.email = request.data.get('email', instance.email)
+        instance.save()
+
+        self._sync_profile(instance, request)
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
 
 class EquipmentViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -179,8 +197,22 @@ class IncidentViewSet(viewsets.ModelViewSet):
         incident = self.get_object()
         incident.status = 'RESOLVED'
         incident.save()
+        # If this incident references equipment, and there are no other open incidents for it,
+        # mark equipment operational again.
+        if incident.equipment:
+            open_count = Incident.objects.filter(equipment=incident.equipment, status='OPEN').exclude(id=incident.id).count()
+            if open_count == 0:
+                incident.equipment.status = 'OPERATIONAL'
+                incident.equipment.save()
         serializer = self.get_serializer(incident)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        # When creating an incident attached to equipment, set that equipment status to BROKEN
+        incident = serializer.save()
+        if incident.equipment and incident.status != 'RESOLVED':
+            incident.equipment.status = 'BROKEN'
+            incident.equipment.save()
 
 
 class MessageViewSet(viewsets.ModelViewSet):

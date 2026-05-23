@@ -20,14 +20,14 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'status', 'expiration_date', 'department']
+    list_display = ['name', 'status', 'expiration_date', 'department', 'photo']
     list_filter = ['status', 'department']
     search_fields = ['name']
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status', 'assignee', 'due_date']
+    list_display = ['title', 'status', 'assignee', 'due_date', 'duration_hours']
     list_filter = ['status', 'created_at']
     search_fields = ['title', 'description']
 

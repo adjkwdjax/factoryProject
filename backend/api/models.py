@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 # Choices
 ROLE_CHOICES = [
     ('ADMIN', 'Administrator'),
+    ('DEPARTMENT_HEAD', 'Department Head'),
     ('WORKER', 'Worker'),
 ]
 
@@ -62,6 +63,7 @@ class Equipment(models.Model):
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPERATIONAL')
     expiration_date = models.DateField()
+    photo = models.FileField(upload_to='equipment_photos/', null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipment')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,6 +81,7 @@ class Task(models.Model):
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='assigned_tasks')
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tasks')
     due_date = models.DateTimeField()
+    duration_hours = models.PositiveIntegerField(null=True, blank=True, default=None)
     status = models.CharField(max_length=20, choices=TASK_STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

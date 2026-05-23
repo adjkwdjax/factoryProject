@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: workshop_db
+      POSTGRES_USER: workshop_admin
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workshop_admin -d workshop_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      POSTGRES_DB: workshop_db
+      POSTGRES_USER: workshop_admin
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    volumes:
+      - backend_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE_URL: /api
+      VITE_BACKEND_ORIGIN: http://backend:8000
+      DISABLE_HMR: "true"
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
+  backend_media:
