@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Textarea, Select } from '../ui/Input';
 import { api } from '../../services/api';
 import { Equipment, Incident, User } from '../../lib/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { format } from 'date-fns';
-import { AlertCircle, Flame, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 export function IncidentsView() {
   const { currentUser } = useAuth();
@@ -15,45 +13,29 @@ export function IncidentsView() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [form, setForm] = useState<{
-    type: 'ACCIDENT' | 'BROKEN_EQUIPMENT';
-    urgency: 'HIGH' | 'CRITICAL';
-    description: string;
-    equipmentId: string;
-  }>({
-    type: 'BROKEN_EQUIPMENT',
-    urgency: 'HIGH',
-    description: '',
-    equipmentId: ''
-  });
-
   const loadData = async () => {
-    const [i, e, u] = await Promise.all([api.getIncidents(), api.getEquipment(), api.getUsers()]);
-    setIncidents(i);
-    // Workers see their department's eq. Admins see all eq to assign generic broken status if needed.
-    setEquipment(currentUser?.role === 'ADMIN' ? e : e.filter(eq => eq.departmentId === currentUser?.departmentId));
-    setUsers(u);
+    const [incidentList, equipmentList, userList] = await Promise.all([
+      api.getIncidents(),
+      api.getEquipment(),
+      api.getUsers(),
+    ]);
+
+    setIncidents(incidentList);
+    setEquipment(
+      currentUser?.role === 'ADMIN'
+        ? equipmentList
+        : equipmentList.filter(eq => eq.departmentId === currentUser?.departmentId)
+    );
+    setUsers(userList);
     setIsLoading(false);
   };
 
-  useEffect(() => { loadData(); }, [currentUser]);
-
-  const handleSubmit = async () => {
-    if (!form.description) return;
-    await api.reportIncident({
-      type: form.type,
-      urgency: form.urgency,
-      description: form.description,
-      equipmentId: form.type === 'BROKEN_EQUIPMENT' ? form.equipmentId : undefined,
-      reporterId: currentUser!.id,
-    });
-    setForm({ type: 'BROKEN_EQUIPMENT', urgency: 'HIGH', description: '', equipmentId: '' });
+  useEffect(() => {
     loadData();
-    alert("Сообщение об инциденте успешно отправлено!");
-  };
+  }, [currentUser]);
 
   const handleResolve = async (id: string) => {
-    if (confirm("Пометить инцидент как разрешенный?")) {
+    if (confirm('Пометить инцидент как разрешенный?')) {
       await api.resolveIncident(id);
       loadData();
     }
@@ -67,61 +49,6 @@ export function IncidentsView() {
         <h1 className="text-xl font-semibold text-slate-900">История инцидентов</h1>
       </div>
 
-      {/* Report Form */}
-      <Card className="bg-white border-red-200">
-        <CardContent className="space-y-4 p-6">
-         <h3 className="text-sm font-bold text-amber-700 mb-4 uppercase tracking-wider flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" /> СООБЩИТЬ ОБ АВАРИИ
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Тип инцидента</label>
-              <Select value={form.type} onChange={e => setForm({...form, type: e.target.value as any, urgency: e.target.value === 'ACCIDENT' ? 'CRITICAL' : 'HIGH'})}>
-                <option value="BROKEN_EQUIPMENT">Поломка оборудования</option>
-                <option value="ACCIDENT">Авария на производстве</option>
-              </Select>
-            </div>
-            
-            {form.type === 'BROKEN_EQUIPMENT' && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Оборудование</label>
-                <Select value={form.equipmentId} onChange={e => setForm({...form, equipmentId: e.target.value})}>
-                  <option value="">Выберите оборудование...</option>
-                  {equipment.map(eq => (
-                    <option key={eq.id} value={eq.id}>{eq.name} (ID: {eq.id})</option>
-                  ))}
-                </Select>
-              </div>
-            )}
-            
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Уровень срочности</label>
-              <Select value={form.urgency} onChange={e => setForm({...form, urgency: e.target.value as any})} disabled={form.type === 'ACCIDENT'}>
-                <option value="HIGH">Высокая (Требуется внимание)</option>
-                <option value="CRITICAL">Критическая (Угроза остановки / безопасности)</option>
-              </Select>
-            </div>
-            
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Описание проблемы</label>
-              <Textarea 
-                placeholder="Подробно опишите что случилось..." 
-                value={form.description} 
-                onChange={e => setForm({...form, description: e.target.value})} 
-                className={form.type === 'ACCIDENT' ? 'focus:ring-red-500 border-red-200 bg-red-50' : ''}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-6">
-              <Button variant="danger" disabled={!form.description} onClick={handleSubmit}>
-              <Flame className="w-4 h-4 mr-2" />
-              Сообщить об аварии
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Incident Feed */}
       <section className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col flex-1 shadow-sm">
         <h3 className="text-lg font-semibold text-slate-900 mb-6">История инцидентов</h3>
         <div className="space-y-3 overflow-y-auto custom-scrollbar min-h-0">
@@ -132,50 +59,69 @@ export function IncidentsView() {
             const isCritical = inc.urgency === 'CRITICAL';
 
             return (
-              <div 
-                key={inc.id} 
+              <div
+                key={inc.id}
                 className={`p-5 rounded-2xl border transition-all ${
-                  isResolved ? 'bg-slate-50 border-slate-200 opacity-60' : 
-                  isCritical ? 'bg-red-50 border-red-200 shadow-sm' : 
-                  'bg-amber-50 border-amber-200'
+                  isResolved
+                    ? 'bg-slate-50 border-slate-200 opacity-60'
+                    : isCritical
+                      ? 'bg-red-50 border-red-200 shadow-sm'
+                      : 'bg-amber-50 border-amber-200'
                 }`}
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
-                      <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase tracking-widest ${
-                        isResolved ? 'bg-slate-100 text-slate-500' : 
-                        isCritical ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse' : 
-                        'bg-amber-100 text-amber-700 border border-amber-200'
-                      }`}>
+                      <span
+                        className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase tracking-widest ${
+                          isResolved
+                            ? 'bg-slate-100 text-slate-500'
+                            : isCritical
+                              ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse'
+                              : 'bg-amber-100 text-amber-700 border border-amber-200'
+                        }`}
+                      >
                         {inc.type === 'ACCIDENT' ? 'АВАРИЯ' : 'ПОЛОМКА'}
                       </span>
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
                         {format(new Date(inc.timestamp), 'dd.MM HH:mm')}
                       </span>
                     </div>
-                    
+
                     <p className={`text-[15px] font-medium leading-relaxed ${!isResolved && isCritical ? 'text-red-900' : 'text-slate-800'}`}>
                       {inc.description}
                     </p>
-                    
+
                     <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-4 pt-4 border-t border-slate-200">
-                      <p>Сообщил: <span className="text-slate-700">{reporter?.name || 'Неизвестно'}</span></p>
-                      {eq && <p className="mt-1">Оборудование: <span className="text-slate-700">{eq.name}</span></p>}
+                      <p>
+                        Сообщил: <span className="text-slate-700">{reporter?.name || 'Неизвестно'}</span>
+                      </p>
+                      {eq && (
+                        <p className="mt-1">
+                          Оборудование: <span className="text-slate-700">{eq.name}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end justify-start gap-4">
                     <div className={`flex items-center text-xs font-bold uppercase tracking-widest ${isResolved ? 'text-slate-500' : isCritical ? 'text-red-600' : 'text-amber-700'}`}>
                       {isResolved ? (
-                         <><CheckCircle className="w-4 h-4 mr-1.5"/> Разрешено</>
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-1.5" /> Разрешено
+                        </>
                       ) : (
-                         <><AlertCircle className="w-4 h-4 mr-1.5"/> Активно</>
+                        <>
+                          <AlertCircle className="w-4 h-4 mr-1.5" /> Активно
+                        </>
                       )}
                     </div>
 
                     {currentUser?.role === 'ADMIN' && !isResolved && (
-                      <Button onClick={() => handleResolve(inc.id)} className="text-xs uppercase tracking-widest font-bold bg-amber-600 hover:bg-amber-500 shadow-lg shadow-amber-900/20">
+                      <Button
+                        onClick={() => handleResolve(inc.id)}
+                        className="text-xs uppercase tracking-widest font-bold bg-amber-600 hover:bg-amber-500 shadow-lg shadow-amber-900/20"
+                      >
                         Устранено
                       </Button>
                     )}

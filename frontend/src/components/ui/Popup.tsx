@@ -1,12 +1,14 @@
 import React from 'react';
 
 interface PopupProps {
-  imageUrl: string;
+  imageUrl?: string;
   onClose: () => void;
   isOpen?: boolean;
+  title?: string;
+  children?: React.ReactNode;
 }
 
-const Popup: React.FC<PopupProps> = ({ imageUrl, onClose, isOpen = true }) => {
+const Popup: React.FC<PopupProps> = ({ imageUrl, onClose, isOpen = true, title, children }) => {
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
@@ -55,7 +57,8 @@ const Popup: React.FC<PopupProps> = ({ imageUrl, onClose, isOpen = true }) => {
         <button style={closeButtonStyle} onClick={onClose}>
           ✕
         </button>
-        <img src={imageUrl} alt="popup" style={imageStyle} />
+        {title && <div style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 700 }}>{title}</div>}
+        {children ?? (imageUrl ? <img src={imageUrl} alt="popup" style={imageStyle} /> : null)}
       </div>
     </div>
   );
