@@ -33,14 +33,10 @@ services:
   frontend:
     build:
       context: ./frontend
-    environment:
-      VITE_API_BASE_URL: /api
-      VITE_BACKEND_ORIGIN: http://backend:8000
-      DISABLE_HMR: "true"
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "3000:80"
 
 volumes:
   db_data:

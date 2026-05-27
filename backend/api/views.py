@@ -123,6 +123,10 @@ class UserViewSet(viewsets.ModelViewSet):
             'last_name': request.data.get('last_name', ''),
             'email': request.data.get('email', ''),
         }
+        # include password if provided
+        password = request.data.get('password')
+        if password:
+            user_data['password'] = password
 
         user = User.objects.create_user(**user_data)
         self._sync_profile(user, request)
@@ -137,6 +141,10 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.first_name = request.data.get('first_name', instance.first_name)
         instance.last_name = request.data.get('last_name', instance.last_name)
         instance.email = request.data.get('email', instance.email)
+        # If password provided, set it securely
+        password = request.data.get('password')
+        if password:
+            instance.set_password(password)
         instance.save()
 
         self._sync_profile(instance, request)

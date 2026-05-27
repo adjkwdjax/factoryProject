@@ -1,0 +1,106 @@
+%% ER-диаграмма — только прикладные таблицы
+%% Убраны служебные django-таблицы; показаны только функциональные сущности проекта
+
+erDiagram
+    %% Лёгкая сущность пользователя (замена системной auth_user)
+    USER {
+        bigint id PK
+        varchar username
+        varchar first_name
+        varchar last_name
+        varchar email
+        boolean is_active
+    }
+
+    API_DEPARTMENT {
+        bigint id PK
+        varchar name
+        datetime created_at
+        datetime updated_at
+    }
+
+    API_USERPROFILE {
+        bigint id PK
+        bigint user_id FK
+        varchar role
+        bigint department_id FK
+    }
+
+    API_EQUIPMENT {
+        bigint id PK
+        varchar name
+        varchar status
+        date expiration_date
+        varchar photo
+        bigint department_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    API_TASK {
+        bigint id PK
+        varchar title
+        text description
+        bigint assignee_id FK
+        bigint creator_id FK
+        datetime due_date
+        integer duration_hours
+        varchar status
+        datetime created_at
+        datetime updated_at
+    }
+
+    API_COMMENT {
+        bigint id PK
+        bigint task_id FK
+        bigint author_id FK
+        text text
+        datetime created_at
+    }
+
+    API_INCIDENT {
+        bigint id PK
+        varchar type
+        text description
+        bigint reporter_id FK
+        bigint equipment_id FK
+        varchar status
+        varchar urgency
+        datetime created_at
+        datetime updated_at
+    }
+
+    API_MESSAGE {
+        bigint id PK
+        bigint sender_id FK
+        bigint receiver_id FK
+        text text
+        datetime created_at
+        boolean read
+    }
+
+    %% Комментарии к связям (простым языком)
+    %% один пользователь -> один профиль
+    USER ||--|| API_USERPROFILE : user_id
+    %% в одном подразделении может быть много профилей
+    API_DEPARTMENT ||--o{ API_USERPROFILE : department_id
+
+    %% в одном подразделении может быть много единиц оборудования
+    API_DEPARTMENT ||--o{ API_EQUIPMENT : department_id
+
+    %% у задачи есть создатель и исполнитель
+    USER ||--o{ API_TASK : assignee_id
+    USER ||--o{ API_TASK : creator_id
+    %% у задачи может быть много комментариев
+    API_TASK ||--o{ API_COMMENT : task_id
+    %% комментарий пишет пользователь
+    USER ||--o{ API_COMMENT : author_id
+
+    %% инцидент сообщает пользователь
+    USER ||--o{ API_INCIDENT : reporter_id
+    %% инцидент может быть связан с оборудованием
+    API_EQUIPMENT ||--o{ API_INCIDENT : equipment_id
+
+    %% сообщение отправляет и получает пользователь
+    USER ||--o{ API_MESSAGE : sender_id
+    USER ||--o{ API_MESSAGE : receiver_id

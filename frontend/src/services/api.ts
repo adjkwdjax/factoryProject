@@ -181,7 +181,7 @@ export const api = {
     const username = `${slug}-${Date.now().toString().slice(-4)}`;
 
     const payload: any = {
-      username,
+      username: (user as any).username || username,
       first_name: firstName,
       last_name: lastName,
       email: (user as any).email || '',
@@ -190,6 +190,8 @@ export const api = {
         department_id: (user as any).departmentId || '',
       },
     };
+
+    if ((user as any).password) payload.password = (user as any).password;
 
     return fetchData(`${API_BASE_URL}/users/`, {
       method: 'POST',
@@ -212,6 +214,8 @@ export const api = {
         department_id: user.departmentId || '',
       },
     };
+    if ((user as any).username) payload.username = (user as any).username;
+    if ((user as any).password) payload.password = (user as any).password;
 
     return fetchData(`${API_BASE_URL}/users/${id}/`, {
       method: 'PATCH',

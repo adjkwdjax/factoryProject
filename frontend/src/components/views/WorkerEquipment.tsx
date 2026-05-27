@@ -5,6 +5,7 @@ import { Equipment, Department } from '../../lib/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { Wrench, AlertTriangle, CheckCircle, Flame } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
+import Popup from '../ui/Popup';
 
 export function WorkerEquipment() {
   const { currentUser } = useAuth();
@@ -12,6 +13,7 @@ export function WorkerEquipment() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [popUpisOpen, setPopUpIsOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -40,6 +42,7 @@ export function WorkerEquipment() {
   const expiredEq = equipment.filter(e => e.status === 'EXPIRED');
 
   return (
+    <>
     <div className="space-y-6">
       <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-6">
         <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-3">
@@ -76,7 +79,7 @@ export function WorkerEquipment() {
             >
               <CardContent className="p-6 flex items-start gap-4 flex-col">
                   {eq.photo ? (
-                      <img src={eq.photo} alt={eq.name} className="w-32 h-32 rounded-xl object-cover border border-slate-200"/>
+                      <img src={eq.photo} alt={eq.name} className="w-32 h-32 rounded-xl object-cover border border-slate-200 cursor-pointer" onClick={() => setSelectedPhoto(eq.photo)} />
                   ) : null}
                  <div className={`p-3 rounded-xl ${
                       isBroken ? 'bg-red-100 text-red-600' : 
@@ -109,5 +112,9 @@ export function WorkerEquipment() {
         })}
       </div>
     </div>
+    {selectedPhoto && (
+      <Popup imageUrl={selectedPhoto} onClose={() => setSelectedPhoto(null)} />
+    )}
+    </>
   );
 }

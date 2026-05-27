@@ -3,10 +3,10 @@ import React from 'react';
 interface PopupProps {
   imageUrl: string;
   onClose: () => void;
-  isOpen: boolean;
+  isOpen?: boolean;
 }
 
-const Popup: React.FC<PopupProps> = ({ imageUrl, onClose, isOpen }) => {
+const Popup: React.FC<PopupProps> = ({ imageUrl, onClose, isOpen = true }) => {
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,

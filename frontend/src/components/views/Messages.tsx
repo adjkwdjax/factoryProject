@@ -66,7 +66,7 @@ export function MessagesView() {
              <button
                key={u.id}
                onClick={() => setSelectedUserId(u.id)}
-               className={`w-full text-left p-4 hover:bg-slate-50 transition-colors flex items-center gap-4 ${selectedUserId === u.id ? 'bg-amber-50 border-l-2 border-amber-500' : 'border-l-2 border-transparent'}`}
+               className={`w-full text-left p-4 hover:bg-slate-50 transition-colors flex items-center gap-4 ${selectedUserId === u.id ? 'bg-amber-50 border-1-2 border-amber-500' : 'border-l-2 border-transparent'}`}
              >
                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${u.role === 'ADMIN' || u.role === 'DEPARTMENT_HEAD' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                  {u.name.charAt(0)}
@@ -90,12 +90,12 @@ export function MessagesView() {
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4 relative min-h-0">
-          {/* Subtle background gradient */}
+          
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-100 via-white to-white pointer-events-none"></div>
 
           {conversationMessages.length === 0 ? (
              <div className="text-center text-slate-500 mt-20 text-xs font-bold uppercase tracking-widest relative z-10">
-               Нет сообщений. Напишите первым!
+               Нет сообщений.
              </div>
           ) : (
             conversationMessages.map(msg => {

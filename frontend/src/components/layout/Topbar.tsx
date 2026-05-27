@@ -29,9 +29,9 @@ export function Topbar() {
       <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white/90 backdrop-blur-md shrink-0 w-full z-50 text-slate-900">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-amber-900/20">
-            F
+            PT
           </div>
-          <span className="font-semibold tracking-tight text-xl text-slate-900">...</span>
+          <span className="font-semibold tracking-tight text-xl text-slate-900">Production Tasks</span>
         </div>
 
         <div className="flex gap-4 items-center">

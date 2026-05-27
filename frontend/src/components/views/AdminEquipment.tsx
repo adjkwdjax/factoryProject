@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 import { Department, Equipment } from '../../lib/mockData';
 import { Plus, AlertTriangle, CheckCircle, Flame, Upload } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
+import Popup from '../ui/Popup';
 
 export function AdminEquipment() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -14,6 +15,8 @@ export function AdminEquipment() {
 
   const [newEq, setNewEq] = useState({ name: '', expirationDate: '', departmentId: '' });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const loadData = async () => {
     const [e, d] = await Promise.all([api.getEquipment(), api.getDepartments()]);
@@ -31,6 +34,18 @@ export function AdminEquipment() {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  useEffect(() => {
+    let url: string | null = null;
+    if (photoFile) {
+      url = URL.createObjectURL(photoFile);
+      setPreviewUrl(url);
+    }
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+      setPreviewUrl(null);
+    };
+  }, [photoFile]);
 
   const handleAdd = async () => {
     if (!newEq.name || !newEq.expirationDate || !newEq.departmentId) return;
@@ -76,6 +91,9 @@ export function AdminEquipment() {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Фото</label>
               <Input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
+              {photoFile && previewUrl && (
+                <img src={previewUrl} alt="preview" className="w-24 h-24 rounded-md mt-2 object-cover border border-slate-200 cursor-pointer" onClick={() => setSelectedPhoto(previewUrl)} />
+              )}
             </div>
             <Button className="w-full" onClick={handleAdd} disabled={!newEq.name || !newEq.expirationDate || !newEq.departmentId}>
               Добавить
@@ -104,7 +122,7 @@ export function AdminEquipment() {
                 <div className="flex justify-between items-center gap-4 w-full">
                   <div className="flex items-center gap-4">
                     {eq.photo ? (
-                      <img src={eq.photo} alt={eq.name} className="w-14 h-14 rounded-xl object-cover border border-slate-200" />
+                      <img src={eq.photo} alt={eq.name} className="w-14 h-14 rounded-xl object-cover border border-slate-200 cursor-pointer" onClick={() => setSelectedPhoto(eq.photo)} />
                     ) : (
                       <div className="w-14 h-14 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-500 text-[10px] uppercase tracking-widest">
                         Фото
@@ -140,6 +158,9 @@ export function AdminEquipment() {
           {equipment.length === 0 && <p className="text-sm text-slate-500 p-4">Нет оборудования.</p>}
         </div>
       </section>
+      {selectedPhoto && (
+        <Popup imageUrl={selectedPhoto} onClose={() => setSelectedPhoto(null)} />
+      )}
     </div>
   );
 }
