@@ -22,8 +22,9 @@ export function Sidebar({ currentNav, onNavigate, onOpenIncidentReport }: { curr
   if (!currentUser) return null;
 
   const adminLinks = [
-    { id: 'dashboard', label: 'Отчеты и Информационная панель', icon: LayoutDashboard },
-    { id: 'tasks', label: 'Управление задачами', icon: CheckSquare },
+    { id: 'dashboard', label: 'Аналитическая панель', icon: LayoutDashboard },
+    { id: 'tasks', label: 'Актуальные задачи', icon: CheckSquare },
+    { id: 'tasks-history', label: 'История задач', icon: CheckSquare },
     { id: 'equipment', label: 'Оборудование', icon: Wrench },
     { id: 'users', label: 'Сотрудники и подразделения', icon: Users },
     { id: 'messages', label: 'Сообщения', icon: MessageSquare },
@@ -31,7 +32,8 @@ export function Sidebar({ currentNav, onNavigate, onOpenIncidentReport }: { curr
   ];
 
   const workerLinks = [
-    { id: 'my-tasks', label: 'Мои задачи', icon: CheckSquare },
+    { id: 'my-tasks', label: 'Мои актуальные задачи', icon: CheckSquare },
+    { id: 'my-tasks-history', label: 'История моих задач', icon: CheckSquare },
     { id: 'equipment-status', label: 'Статус оборудования', icon: Wrench },
     { id: 'messages', label: 'Сообщения', icon: MessageSquare },
     { id: 'report-incident', label: 'История инцидентов', icon: AlertOctagon },
@@ -83,7 +85,7 @@ export function Sidebar({ currentNav, onNavigate, onOpenIncidentReport }: { curr
         {currentUser.role === 'WORKER' && (
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
             <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><AlertOctagon className="w-3 h-3"/> Экстренная кнопка</div>
-            <button onClick={onOpenIncidentReport} className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg shadow-lg shadow-amber-200 transition-all text-xs uppercase tracking-wider">Сообщить об аварии или поломке</button>
+            <button onClick={onOpenIncidentReport} className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg shadow-lg shadow-amber-200 transition-all text-xs uppercase tracking-wider">Сообщить об аварии или поломке оборудования</button>
           </div>
         )}
       </div>

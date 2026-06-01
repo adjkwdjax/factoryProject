@@ -14,10 +14,10 @@ import { MessagesView } from './components/views/Messages';
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
   
-  // Default routing
+
   const [currentNav, setCurrentNav] = useState('');
 
-  // Set initial route based on role
+
   if (!currentNav && currentUser) {
     setCurrentNav(currentUser.role === 'WORKER' ? 'my-tasks' : 'dashboard');
   }
@@ -33,11 +33,13 @@ function AppContent() {
   const renderView = () => {
     switch (currentNav) {
       case 'dashboard': return <AdminDashboard />;
-      case 'tasks': return <AdminTasks />;
+      case 'tasks': return <AdminTasks showHistory={false} />;
+      case 'tasks-history': return <AdminTasks showHistory={true} />;
       case 'equipment': return <AdminEquipment />;
       case 'users': return <AdminUsersAndDepts />;
       
-      case 'my-tasks': return <WorkerTasks />;
+      case 'my-tasks': return <WorkerTasks showHistory={false} />;
+      case 'my-tasks-history': return <WorkerTasks showHistory={true} />;
       case 'equipment-status': return <WorkerEquipment />;
       case 'report-incident': return <IncidentsView />;
       case 'incidents': return <IncidentsView />;

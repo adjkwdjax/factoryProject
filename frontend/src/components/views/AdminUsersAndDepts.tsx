@@ -197,7 +197,7 @@ export function AdminUsersAndDepts() {
                   ) : (
                     <>
                       <div>
-                        <p className="font-medium text-slate-200">{user.name}</p>
+                        <p className="font-medium text-black">{user.name}</p>
                         <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mt-1">{dept?.name || 'Нет подразделения'}</p>
                       </div>
                       <div className="flex items-center gap-3">

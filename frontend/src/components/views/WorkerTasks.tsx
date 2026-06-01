@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { format } from 'date-fns';
 import { MessageSquare, Check, Clock, UserIcon } from 'lucide-react';
 
-export function WorkerTasks() {
+export function WorkerTasks({ showHistory = false }: { showHistory?: boolean }) {
   const { currentUser } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -43,17 +43,21 @@ export function WorkerTasks() {
 
   if (isLoading) return <div>Загрузка задач...</div>;
 
+  const filteredTasks = tasks.filter(task => showHistory ? task.status === 'COMPLETED' : task.status === 'PENDING');
+
   return (
     <div className="space-y-6 flex flex-col flex-1">
       <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Мои задачи</h1>
-        <div className="flex gap-2">
-            <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] uppercase font-bold tracking-widest">{tasks.length} Активных</span>
-         </div>
+        <h1 className="text-xl font-semibold text-slate-900">{showHistory ? 'История задач' : 'Мои задачи'}</h1>
+        {!showHistory && (
+          <div className="flex gap-2">
+              <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] uppercase font-bold tracking-widest">{filteredTasks.length} Активных</span>
+           </div>
+        )}
       </div>
       
       <div className="space-y-4">
-        {tasks.map(task => {
+        {filteredTasks.map(task => {
           const isExpanded = expandedTaskId === task.id;
           const isCompleted = task.status === 'COMPLETED';
 
@@ -79,6 +83,11 @@ export function WorkerTasks() {
                       <span className={`text-[10px] flex items-center gap-1.5 font-medium tracking-widest uppercase ${!isCompleted && new Date(task.dueDate) < new Date() ? 'text-red-500' : 'text-slate-500'}`}>
                         <Clock className="w-3 h-3" /> До: {format(new Date(task.dueDate), 'dd.MM.yyyy HH:mm')}
                       </span>
+                      {isCompleted && task.completedAt && (
+                        <span className="text-[10px] flex items-center gap-1.5 font-medium tracking-widest uppercase text-green-600">
+                          <Check className="w-3 h-3" /> Выполнена: {format(new Date(task.completedAt), 'dd.MM.yyyy HH:mm')}
+                        </span>
+                      )}
                     </div>
                   </div>
                   
@@ -132,11 +141,11 @@ export function WorkerTasks() {
             </div>
           );
         })}
-        {tasks.length === 0 && (
+        {filteredTasks.length === 0 && (
           <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
             <Check className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Задач нет</h3>
-            <p className="text-slate-500 text-xs mt-2">Все поручения выполнены.</p>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">{showHistory ? 'Истории пока нет' : 'Задач нет'}</h3>
+            <p className="text-slate-500 text-xs mt-2">{showHistory ? 'Вы еще не выполнили ни одной задачи.' : 'Все поручения выполнены.'}</p>
           </div>
         )}
       </div>

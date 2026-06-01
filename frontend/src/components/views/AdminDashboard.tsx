@@ -139,7 +139,7 @@ export function AdminDashboard() {
     <div className="space-y-6 flex-1 flex flex-col">
       <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-amber-700 mb-2">Отчётная панель</p>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-amber-700 mb-2">Аналитическая панель</p>
           <h1 className="text-2xl font-semibold text-slate-900">Оперативная сводка по цеху</h1>
           <p className="text-sm text-slate-500 mt-1">Сотрудники, подразделения и дополнительные метрики в одном экране.</p>
         </div>

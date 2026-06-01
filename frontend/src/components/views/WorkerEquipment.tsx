@@ -58,7 +58,7 @@ export function WorkerEquipment() {
           <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0" />
           <div>
              <h3 className="font-bold text-amber-400 text-sm uppercase tracking-widest mb-1">Оборудование требует ТО</h3>
-             <p className="text-amber-500/80 text-xs text-medium">Агрегаты ({expiredEq.length} ед.) имеют истекший срок эксплуатации.</p>
+             <p className="text-amber-500/80 text-xs text-medium">Оборудование ({expiredEq.length} ед.) имеют истекший срок эксплуатации.</p>
           </div>
         </div>
       )}
@@ -99,11 +99,8 @@ export function WorkerEquipment() {
                           ${isBroken ? 'bg-red-100 text-red-700' : 
                             isExpired ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}
                       `}>
-                         {isBroken ? 'КРИТИЧНО' : isExpired ? 'ТРЕБУЕТ ТО' : 'ИСПРАВНО'}
+                         {isBroken ? 'КРИТИЧНО' : isExpired ? `ТРЕБУЕТ ТО (ИСТЕК ${format(new Date(eq.expirationDate), 'dd.MM.yyyy')})` : `ИСПРАВНО (до ${format(new Date(eq.expirationDate), 'dd.MM.yyyy')})`}
                       </span>
-                    </p>
-                    <p className={`text-[10px] uppercase tracking-widest font-bold mt-2 ${isExpired ? 'text-amber-700' : 'text-slate-500'}`}>
-                      Истекает: {format(new Date(eq.expirationDate), 'dd.MM')}
                     </p>
                   </div>
               </CardContent>

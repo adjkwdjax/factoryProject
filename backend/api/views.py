@@ -167,6 +167,17 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
+    def perform_update(self, serializer):
+        from django.utils import timezone
+        # If status changes to COMPLETED and completed_at is not set, set it.
+        instance = serializer.instance
+        old_status = instance.status
+        new_status = serializer.validated_data.get('status', old_status)
+        if old_status != 'COMPLETED' and new_status == 'COMPLETED':
+            serializer.save(completed_at=timezone.now())
+        else:
+            serializer.save()
+
     @action(detail=True, methods=['post'])
     def add_comment(self, request, pk=None):
         task = self.get_object()

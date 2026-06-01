@@ -83,6 +83,7 @@ class Task(models.Model):
     due_date = models.DateTimeField()
     duration_hours = models.PositiveIntegerField(null=True, blank=True, default=None)
     status = models.CharField(max_length=20, choices=TASK_STATUS_CHOICES, default='PENDING')
+    completed_at = models.DateTimeField(null=True, blank=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

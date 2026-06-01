@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
 import { MessageSquare, Plus, Trash2, Edit2 } from 'lucide-react';
 
-export function AdminTasks() {
+export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
   const { currentUser } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -65,13 +65,15 @@ export function AdminTasks() {
     ? users.filter(user => user.role === 'WORKER' && user.departmentId === currentUser.departmentId)
     : users.filter(user => user.role === 'WORKER');
 
+  const filteredTasks = visibleTasks.filter(task => showHistory ? task.status === 'COMPLETED' : task.status === 'PENDING');
+
   if (isLoading) return <div>Загрузка управления задачами...</div>;
 
   return (
     <div className="space-y-6 flex flex-col flex-1">
       <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Управление задачами</h1>
-        <Button onClick={() => setIsCreating(true)}><Plus className="w-4 h-4 mr-2"/> Новая задача</Button>
+        <h1 className="text-xl font-semibold text-slate-900">{showHistory ? 'История задач' : 'Управление актуальными задачами'}</h1>
+        {!showHistory && <Button onClick={() => setIsCreating(true)}><Plus className="w-4 h-4 mr-2"/> Новая задача</Button>}
       </div>
 
       {isCreating && (
@@ -113,11 +115,11 @@ export function AdminTasks() {
 
       <div className="bg-white border border-slate-200 rounded-2xl p-6 flex-1 flex flex-col shadow-sm">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-slate-900">Активные задачи</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{showHistory ? 'Завершенные задачи' : 'Активные задачи'}</h3>
         </div>
         
         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar min-h-0">
-          {visibleTasks.map(task => {
+          {filteredTasks.map(task => {
             const assignee = users.find(u => u.id === task.assigneeId);
             const isExpanded = expandedTaskId === task.id;
             const isCompleted = task.status === 'COMPLETED';
@@ -193,7 +195,7 @@ export function AdminTasks() {
               </div>
             );
           })}
-          {visibleTasks.length === 0 && <p className="text-slate-500 text-center py-8 text-sm">Задачи пока не созданы.</p>}
+          {filteredTasks.length === 0 && <p className="text-slate-500 text-center py-8 text-sm">{showHistory ? 'История задач пуста.' : 'Задачи пока не созданы.'}</p>}
         </div>
       </div>
     </div>

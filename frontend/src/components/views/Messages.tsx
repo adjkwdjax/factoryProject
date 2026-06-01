@@ -73,7 +73,7 @@ export function MessagesView() {
                </div>
                <div className="overflow-hidden">
                  <p className="font-medium text-sm text-slate-900 truncate">{u.name}</p>
-                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold truncate mt-0.5">{u.role === 'ADMIN' || u.role === 'DEPARTMENT_HEAD' ? 'Руководитель' : 'Сотрудник'}</p>
+                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold truncate mt-0.5">{u.role === 'ADMIN' ? 'Начальник цеха' : u.role === 'DEPARTMENT_HEAD' ? 'Начальник подразделения' : 'Сотрудник'}</p>
                </div>
              </button>
            ))}

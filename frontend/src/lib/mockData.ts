@@ -37,6 +37,7 @@ export interface Task {
   dueDate: string;
   durationHours?: number;
   status: 'PENDING' | 'COMPLETED';
+  completedAt?: string | null;
   comments: Comment[];
   created_at?: string;
   updated_at?: string;
