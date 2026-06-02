@@ -17,6 +17,8 @@ export function AdminUsersAndDepts() {
   const [newDeptName, setNewDeptName] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState({ name: '', username: '', password: '', role: 'WORKER' as 'ADMIN'|'DEPARTMENT_HEAD'|'WORKER', departmentId: '' });
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [editingDeptName, setEditingDeptName] = useState('');
 
   const loadData = async () => {
     const [u, d] = await Promise.all([api.getUsers(), api.getDepartments()]);
@@ -72,11 +74,30 @@ export function AdminUsersAndDepts() {
     loadData();
   };
 
+  const startEditDept = (dept: Department) => {
+    setEditingDeptId(dept.id);
+    setEditingDeptName(dept.name);
+  };
+
+  const handleEditDept = async () => {
+    if (!editingDeptId || !editingDeptName) return;
+    await api.updateDepartment(editingDeptId, { name: editingDeptName });
+    setEditingDeptId(null);
+    setEditingDeptName('');
+    loadData();
+  };
+
+  const handleDeleteDept = async (id: string) => {
+    if (confirm('Удалить подразделение? Все сотрудники этого подразделения потеряют привязку.')) {
+      await api.deleteDepartment(id);
+      loadData();
+    }
+  };
+
   if (isLoading) return <div>Загрузка данных...</div>;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
-      {/* Departments Section */}
       <section className="bg-white border border-slate-200 rounded-2xl flex flex-col overflow-hidden shadow-sm">
         <div className="p-6 border-b border-slate-200 flex justify-between items-center z-10">
           <h2 className="text-xl font-semibold text-slate-900">Подразделения</h2>
@@ -100,14 +121,40 @@ export function AdminUsersAndDepts() {
         )}
 
         <div className="flex-1 overflow-y-auto custom-scrollbar relative min-h-0">
-          {/* Subtle background gradient */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-amber-900/5 via-slate-900/0 to-slate-900/0 pointer-events-none"></div>
 
           <ul className="divide-y divide-slate-200 relative z-10">
             {departments.map(dept => (
               <li key={dept.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                <span className="font-medium text-slate-900">{dept.name}</span>
-                <span className="text-[10px] tracking-widest uppercase font-bold text-slate-500 border border-slate-200 bg-slate-50 px-2 py-1 rounded">ID: {dept.id}</span>
+                {editingDeptId === dept.id ? (
+                  <div className="w-full flex items-center gap-3">
+                    <Input
+                      value={editingDeptName}
+                      onChange={e => setEditingDeptName(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => setEditingDeptId(null)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" onClick={handleEditDept} disabled={!editingDeptName}>
+                      Сохранить
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="font-medium text-slate-900">{dept.name}</span>
+                    {currentUser?.role === 'ADMIN' && (
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => startEditDept(dept)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteDept(dept.id)} className="text-red-400 hover:text-red-300">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </li>
             ))}
             {departments.length === 0 && <li className="p-5 text-slate-500 text-xs">Нет подразделений.</li>}

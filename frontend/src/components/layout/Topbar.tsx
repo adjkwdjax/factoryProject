@@ -48,7 +48,7 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
                 className="flex items-center gap-3 text-sm font-bold text-red-600 uppercase tracking-widest bg-red-100 hover:bg-red-200 px-5 py-2.5 rounded-full border-2 border-red-300 animate-pulse shadow-md transition-colors cursor-pointer"
               >
                 <Flame className="w-5 h-5" />
-                <span>Актуальных аварий: {incidents.length}</span>
+                <span>{incidents.length === 1 ? 'ВНИМАНИЕ! АВАРИЯ НА ПРОИЗВОДСТВЕ!' : 'ВНИМАНИЕ! АВАРИИ НА ПРОИЗВОДСТВЕ!'}</span>
               </button>
            )}
            

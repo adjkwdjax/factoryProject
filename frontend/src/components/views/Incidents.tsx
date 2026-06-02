@@ -117,7 +117,7 @@ export function IncidentsView() {
                       )}
                     </div>
 
-                    {currentUser?.role === 'ADMIN' && !isResolved && (
+                    {(currentUser?.role === 'ADMIN' || currentUser?.role === 'DEPARTMENT_HEAD') && !isResolved && (
                       <Button
                         onClick={() => handleResolve(inc.id)}
                         className="text-xs uppercase tracking-widest font-bold bg-amber-600 hover:bg-amber-500 shadow-lg shadow-amber-900/20"

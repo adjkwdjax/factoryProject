@@ -82,12 +82,10 @@ export function Sidebar({ currentNav, onNavigate, onOpenIncidentReport }: { curr
       </nav>
       
       <div className="p-6 space-y-4 relative z-10">
-        {currentUser.role === 'WORKER' && (
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-            <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><AlertOctagon className="w-3 h-3"/> Экстренная кнопка</div>
-            <button onClick={onOpenIncidentReport} className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg shadow-lg shadow-amber-200 transition-all text-xs uppercase tracking-wider">Сообщить об аварии или поломке оборудования</button>
-          </div>
-        )}
+        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+          <div className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><AlertOctagon className="w-3 h-3"/> Экстренная кнопка</div>
+          <button onClick={onOpenIncidentReport} className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg shadow-lg shadow-amber-200 transition-all text-xs uppercase tracking-wider">Сообщить об аварии или поломке оборудования</button>
+        </div>
       </div>
     </aside>
   );

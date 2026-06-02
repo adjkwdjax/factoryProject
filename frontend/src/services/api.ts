@@ -244,6 +244,20 @@ export const api = {
     });
   },
 
+  updateDepartment: async (id: string, updates: Partial<Department>): Promise<Department> => {
+    return fetchData(`${API_BASE_URL}/departments/${id}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+  },
+
+  deleteDepartment: async (id: string): Promise<void> => {
+    await fetchData(`${API_BASE_URL}/departments/${id}/`, {
+      method: 'DELETE',
+    });
+  },
+
   // Equipment
   getEquipment: async (): Promise<Equipment[]> => {
     const data = await fetchData(`${API_BASE_URL}/equipment/`);
