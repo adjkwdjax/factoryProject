@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Card, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input, Select, Textarea } from '../ui/Input';
 import { api } from '../../services/api';
 import { Task, User } from '../../lib/mockData';
-import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
-import { Clock, MessageSquare, Plus, Trash2, Edit2 } from 'lucide-react';
+import { Clock, MessageSquare, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { formatLocalDateTime, getDeadlineTimeText, toLocalDateTimeInput } from '../../lib/dateTime';
 
 export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
   const { currentUser } = useAuth();
@@ -16,6 +16,14 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
 
   const [isCreating, setIsCreating] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', assigneeId: '', dueDate: '' });
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState({
+    title: '',
+    description: '',
+    assigneeId: '',
+    dueDate: '',
+    status: 'PENDING' as Task['status'],
+  });
   
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
@@ -29,6 +37,8 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
 
   useEffect(() => {
     loadData();
+    const intervalId = window.setInterval(loadData, 3000);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const handleCreate = async () => {
@@ -48,6 +58,35 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
       await api.deleteTask(id);
       loadData();
     }
+  };
+
+  const startEditing = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditingTask({
+      title: task.title,
+      description: task.description,
+      assigneeId: task.assigneeId,
+      dueDate: toLocalDateTimeInput(task.dueDate),
+      status: task.status,
+    });
+    setExpandedTaskId(null);
+  };
+
+  const cancelEditing = () => {
+    setEditingTaskId(null);
+  };
+
+  const handleUpdate = async (id: string) => {
+    if (!editingTask.title || !editingTask.assigneeId || !editingTask.dueDate) return;
+    await api.updateTask(id, {
+      title: editingTask.title,
+      description: editingTask.description,
+      assigneeId: editingTask.assigneeId,
+      dueDate: editingTask.dueDate,
+      status: editingTask.status,
+    });
+    setEditingTaskId(null);
+    loadData();
   };
 
   const handleComment = async (taskId: string) => {
@@ -123,55 +162,102 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
             const assignee = users.find(u => u.id === task.assigneeId);
             const isExpanded = expandedTaskId === task.id;
             const isCompleted = task.status === 'COMPLETED';
+            const isEditing = editingTaskId === task.id;
 
             return (
               <div key={task.id} className="group flex flex-col bg-slate-50 border border-slate-200 hover:border-amber-300 rounded-xl transition-all overflow-hidden">
-                <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className={`font-medium ${isCompleted ? 'line-through text-slate-500' : 'text-slate-900'}`}>
-                      {task.title}
-                    </h4>
-                    <p className={`text-xs mt-1.5 ${isCompleted ? 'text-slate-600' : 'text-slate-600'}`}>
-                      {task.description}
-                    </p>
-                    <div className="flex flex-wrap gap-4 mt-3">
-                      <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
-                        <Edit2 className="w-3 h-3" /> {assignee?.name || 'Неизвестно'}
-                      </span>
-                      <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
-                        <Clock className="w-3 h-3" /> До: {format(new Date(task.dueDate), 'dd.MM.yyyy HH:mm')}
-                      </span>
-                      <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
-                        <Clock className="w-3 h-3" /> Время: {task.durationHours ?? 1} ч
-                      </span>
-                      {isCompleted && task.completedAt && (
-                        <span className="text-[10px] flex items-center gap-1.5 text-green-600 font-medium">
-                          <Clock className="w-3 h-3" /> Выполнена: {format(new Date(task.completedAt), 'dd.MM.yyyy HH:mm')}
-                        </span>
-                      )}
-                      {task.comments.length > 0 && (
-                        <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
-                          <MessageSquare className="w-3 h-3" /> Коммент: {task.comments.length}
-                        </span>
-                      )}
+                {isEditing ? (
+                  <div className="p-4 sm:p-5 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Название</label>
+                        <Input value={editingTask.title} onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Исполнитель</label>
+                        <Select value={editingTask.assigneeId} onChange={e => setEditingTask({ ...editingTask, assigneeId: e.target.value })}>
+                          <option value="">Выберите работника</option>
+                          {availableWorkers.map(u => (
+                            <option key={u.id} value={u.id}>{u.name}</option>
+                          ))}
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Выполнить до</label>
+                        <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({ ...editingTask, dueDate: e.target.value })} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Статус</label>
+                        <Select value={editingTask.status} onChange={e => setEditingTask({ ...editingTask, status: e.target.value as Task['status'] })}>
+                          <option value="PENDING">В процессе</option>
+                          <option value="COMPLETED">Выполнено</option>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5 md:col-span-2 xl:col-span-4">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Описание</label>
+                        <Textarea value={editingTask.description} onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button size="sm" onClick={() => handleUpdate(task.id)} disabled={!editingTask.title || !editingTask.assigneeId || !editingTask.dueDate}>
+                        <Save className="w-4 h-4 mr-2" /> Сохранить
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                        <X className="w-4 h-4 mr-2" /> Отмена
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase ${
-                      isCompleted ? 'bg-slate-100 text-slate-500' : 'bg-amber-100 text-amber-700 border border-amber-200'
-                    }`}>
-                        {isCompleted ? 'Выполнено' : 'В процессе'}
-                    </span>
-                    <Button variant="ghost" size="sm" onClick={() => setExpandedTaskId(isExpanded ? null : task.id)} className="text-slate-500 hover:text-slate-900">
-                      <MessageSquare className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(task.id)} className="text-slate-500 hover:text-red-500 hover:bg-red-50">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                ) : (
+                  <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className={`font-medium ${isCompleted ? 'line-through text-slate-500' : 'text-slate-900'}`}>
+                        {task.title}
+                      </h4>
+                      <p className={`text-xs mt-1.5 ${isCompleted ? 'text-slate-600' : 'text-slate-600'}`}>
+                        {task.description}
+                      </p>
+                      <div className="flex flex-wrap gap-4 mt-3">
+                        <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
+                          <Edit2 className="w-3 h-3" /> {assignee?.name || 'Неизвестно'}
+                        </span>
+                        <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
+                          <Clock className="w-3 h-3" /> До: {formatLocalDateTime(task.dueDate)}
+                        </span>
+                        <span className={`text-[10px] flex items-center gap-1.5 font-medium ${!isCompleted && new Date(task.dueDate) < new Date() ? 'text-red-500' : 'text-slate-600'}`}>
+                          <Clock className="w-3 h-3" /> Время: {getDeadlineTimeText(task.dueDate, task.completedAt)}
+                        </span>
+                        {isCompleted && task.completedAt && (
+                          <span className="text-[10px] flex items-center gap-1.5 text-green-600 font-medium">
+                            <Clock className="w-3 h-3" /> Выполнена: {formatLocalDateTime(task.completedAt)}
+                          </span>
+                        )}
+                        {task.comments.length > 0 && (
+                          <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
+                            <MessageSquare className="w-3 h-3" /> Коммент: {task.comments.length}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase ${
+                        isCompleted ? 'bg-slate-100 text-slate-500' : 'bg-amber-100 text-amber-700 border border-amber-200'
+                      }`}>
+                          {isCompleted ? 'Выполнено' : 'В процессе'}
+                      </span>
+                      <Button variant="ghost" size="sm" onClick={() => startEditing(task)} className="text-slate-500 hover:text-slate-900">
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setExpandedTaskId(isExpanded ? null : task.id)} className="text-slate-500 hover:text-slate-900">
+                        <MessageSquare className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(task.id)} className="text-slate-500 hover:text-red-500 hover:bg-red-50">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {isExpanded && (
+                {isExpanded && !isEditing && (
                   <div className="border-t border-slate-200 p-4 sm:p-5 bg-slate-50 space-y-4">
                     <div className="space-y-3">
                       {task.comments.length === 0 ? (
@@ -183,7 +269,7 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
                             <div key={comment.id} className="bg-white p-3 rounded-lg border border-slate-200 text-sm">
                               <div className="flex justify-between items-center text-xs mb-1.5">
                                 <span className="font-bold text-slate-700">{author?.name}</span>
-                                <span className="text-slate-500">{format(new Date(comment.timestamp), 'dd.MM HH:mm')}</span>
+                                <span className="text-slate-500">{formatLocalDateTime(comment.timestamp)}</span>
                               </div>
                               <p className="text-slate-600 text-xs">{comment.text}</p>
                             </div>

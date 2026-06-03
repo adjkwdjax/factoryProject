@@ -85,7 +85,8 @@ class TaskSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     assigneeId = serializers.SerializerMethodField()
     creatorId = serializers.SerializerMethodField()
-    dueDate = serializers.DateTimeField(source='due_date')
+    due_date = serializers.DateTimeField(required=False)
+    dueDate = serializers.DateTimeField(source='due_date', required=False)
     durationHours = serializers.IntegerField(source='duration_hours', required=False, allow_null=True)
     completedAt = serializers.DateTimeField(source='completed_at', required=False, allow_null=True)
 
@@ -94,6 +95,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_creatorId(self, obj):
         return obj.creator.id
+
+    def validate(self, attrs):
+        if self.instance is None and 'due_date' not in attrs:
+            raise serializers.ValidationError({'dueDate': ['This field is required.']})
+        return attrs
 
     class Meta:
         model = Task

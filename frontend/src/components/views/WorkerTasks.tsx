@@ -5,8 +5,8 @@ import { Input } from '../ui/Input';
 import { api } from '../../services/api';
 import { Task, User } from '../../lib/mockData';
 import { useAuth } from '../../context/AuthContext';
-import { format } from 'date-fns';
 import { MessageSquare, Check, Clock, UserIcon } from 'lucide-react';
+import { formatLocalDateTime, getDeadlineTimeText } from '../../lib/dateTime';
 
 export function WorkerTasks({ showHistory = false }: { showHistory?: boolean }) {
   const { currentUser } = useAuth();
@@ -27,6 +27,8 @@ export function WorkerTasks({ showHistory = false }: { showHistory?: boolean }) 
 
   useEffect(() => {
     loadData();
+    const intervalId = window.setInterval(loadData, 3000);
+    return () => window.clearInterval(intervalId);
   }, [currentUser]);
 
   const handleComplete = async (taskId: string) => {
@@ -76,16 +78,19 @@ export function WorkerTasks({ showHistory = false }: { showHistory?: boolean }) 
                       </span>
                     </div>
                     <p className={`text-sm ${isCompleted ? 'text-slate-600' : 'text-slate-600'}`}>{task.description}</p>
-                    <div className="flex gap-4 mt-4 pt-4 border-t border-slate-200">
+                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-slate-200">
                       <span className="text-[10px] flex items-center gap-1.5 text-slate-500 font-medium tracking-widest uppercase">
                         <UserIcon className="w-3 h-3" /> Назначил: {users.find(u => u.id === task.creatorId)?.name}
                       </span>
                       <span className={`text-[10px] flex items-center gap-1.5 font-medium tracking-widest uppercase ${!isCompleted && new Date(task.dueDate) < new Date() ? 'text-red-500' : 'text-slate-500'}`}>
-                        <Clock className="w-3 h-3" /> До: {format(new Date(task.dueDate), 'dd.MM.yyyy HH:mm')}
+                        <Clock className="w-3 h-3" /> До: {formatLocalDateTime(task.dueDate)}
+                      </span>
+                      <span className={`text-[10px] flex items-center gap-1.5 font-medium tracking-widest uppercase ${!isCompleted && new Date(task.dueDate) < new Date() ? 'text-red-500' : 'text-slate-500'}`}>
+                        <Clock className="w-3 h-3" /> Время: {getDeadlineTimeText(task.dueDate, task.completedAt)}
                       </span>
                       {isCompleted && task.completedAt && (
                         <span className="text-[10px] flex items-center gap-1.5 font-medium tracking-widest uppercase text-green-600">
-                          <Check className="w-3 h-3" /> Выполнена: {format(new Date(task.completedAt), 'dd.MM.yyyy HH:mm')}
+                          <Check className="w-3 h-3" /> Выполнена: {formatLocalDateTime(task.completedAt)}
                         </span>
                       )}
                     </div>
@@ -117,7 +122,7 @@ export function WorkerTasks({ showHistory = false }: { showHistory?: boolean }) 
                               <div className={`p-3 rounded-xl max-w-[80%] ${isMe ? 'bg-amber-100 border border-amber-200' : 'bg-white border border-slate-200'}`}>
                                 <div className={`flex items-center gap-2 mb-1.5 text-[10px] uppercase tracking-widest font-bold ${isMe ? 'text-amber-700' : 'text-slate-500'}`}>
                                   <span>{isMe ? 'Вы' : author?.name}</span>
-                                  <span>{format(new Date(comment.timestamp), 'HH:mm dd.MM')}</span>
+                                  <span>{formatLocalDateTime(comment.timestamp)}</span>
                                 </div>
                                 <p className="text-xs text-slate-700">{comment.text}</p>
                               </div>

@@ -1,4 +1,5 @@
 import { Task, User, Equipment, Incident, Message, Department } from '../lib/mockData';
+import { toUtcIsoFromLocalInput } from '../lib/dateTime';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -307,13 +308,19 @@ export const api = {
   },
   
   addTask: async (task: Omit<Task, 'id' | 'comments'>): Promise<Task> => {
-    const payload = {
-      ...task,
+    const dueDateUtc = toUtcIsoFromLocalInput(task.dueDate);
+    const payload: any = {
+      title: task.title,
+      description: task.description,
+      status: task.status,
       creator_id: task.creatorId,
       assignee_id: task.assigneeId,
-      due_date: task.dueDate,
-      duration_hours: task.durationHours ?? 1,
+      due_date: dueDateUtc,
+      dueDate: dueDateUtc,
     };
+    if (task.durationHours !== undefined && task.durationHours !== null) {
+      payload.duration_hours = task.durationHours;
+    }
     return fetchData(`${API_BASE_URL}/tasks/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -322,10 +329,18 @@ export const api = {
   },
   
   updateTask: async (id: string, updates: Partial<Task>): Promise<Task> => {
-    const payload: any = { ...updates };
+    const payload: any = {};
+    if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.description !== undefined) payload.description = updates.description;
+    if (updates.status !== undefined) payload.status = updates.status;
+    if (updates.completedAt !== undefined) payload.completed_at = updates.completedAt;
     if (updates.creatorId) payload.creator_id = updates.creatorId;
     if (updates.assigneeId) payload.assignee_id = updates.assigneeId;
-    if (updates.dueDate) payload.due_date = updates.dueDate;
+    if (updates.dueDate) {
+      const dueDateUtc = toUtcIsoFromLocalInput(updates.dueDate);
+      payload.due_date = dueDateUtc;
+      payload.dueDate = dueDateUtc;
+    }
     if (updates.durationHours !== undefined) payload.duration_hours = updates.durationHours;
     
     return fetchData(`${API_BASE_URL}/tasks/${id}/`, {
