@@ -171,7 +171,7 @@ export function MainLayout({ children, currentNav, onNavigate }: { children: Rea
                 <Select value={form.equipmentId} onChange={e => setForm({...form, equipmentId: e.target.value})}>
                   <option value="">Выберите оборудование...</option>
                   {equipment.map(eq => (
-                    <option key={eq.id} value={eq.id}>{eq.name} (ID: {eq.id})</option>
+                    <option key={eq.id} value={eq.id}>{eq.name}</option>
                   ))}
                 </Select>
               </div>
