@@ -177,8 +177,6 @@ export function AdminDashboard() {
       <div className="flex justify-between items-center bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-amber-700 mb-2">Аналитическая панель</p>
-          <h1 className="text-2xl font-semibold text-slate-900">Оперативная сводка по цеху</h1>
-          <p className="text-sm text-slate-500 mt-1">Сотрудники, подразделения и дополнительные метрики в одном экране.</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-amber-100 text-[10px] text-amber-700 uppercase font-bold">Управление</span>

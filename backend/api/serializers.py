@@ -120,6 +120,11 @@ class EquipmentSerializer(serializers.ModelSerializer):
     def get_departmentId(self, obj):
         return obj.department.id if obj.department else None
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['photo'] = instance.photo.url if instance.photo else None
+        return data
+
     class Meta:
         model = Equipment
         fields = [

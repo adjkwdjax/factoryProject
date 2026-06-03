@@ -9,12 +9,14 @@
 ## Стек
 
 ### Бекенд
+
 - **Django 5.2** - веб-фреймворк
 - **Django REST Framework** - API
 - **PostgreSQL** - база данных
 - **django-cors-headers** - CORS поддержка
 
 ### Фронтенд
+
 - **React 18** - UI библиотека
 - **TypeScript** - типизированный JavaScript
 - **Vite** - сборщик модулей
@@ -54,7 +56,16 @@ psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE workshop_db TO workshop_ad
 ```bash
 cd backend
 
+# macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
 # Windows
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
 python manage.py migrate
 python populate_db.py
 python manage.py runserver 0.0.0.0:8000
@@ -85,19 +96,27 @@ npm run dev
 ```bash
 python manage.py create_shop_manager --username my_admin --password my_password
 ```
+
 Дополнительные параметры: `--first_name`, `--last_name`, `--email`.
+
+```bash
+docker compose exec backend python manage.py create_shop_manager --username my_admin --password my_password
+```
 
 ## Учетные данные для входа
 
 ### Администратор
+
 - **Имя пользователя**: test_admin1
 - **Пароль**: password123
 
 ### Начальник подразделения
+
 - **Имя пользователя**: test_head1
 - **Пароль**: password123
 
 ### Рабочие
+
 - **test_worker1** / password123
 - **test_worker2** / password123
 - **test_worker3** / password123
@@ -145,22 +164,26 @@ factory-project/
 Все endpoints доступны по адресу `http://localhost:8000/api/`
 
 ### Users (Пользователи)
+
 - `GET /api/users/` - получить всех пользователей
 - `POST /api/users/` - создать пользователя
 - `GET /api/users/{id}/` - получить пользователя
 - `PATCH /api/users/{id}/` - обновить пользователя
 
 ### Departments (Подразделения)
+
 - `GET /api/departments/` - все подразделения
 - `POST /api/departments/` - создать подразделение
 - `PATCH /api/departments/{id}/` - обновить подразделение
 
 ### Equipment (Оборудование)
+
 - `GET /api/equipment/` - все оборудование
 - `POST /api/equipment/` - добавить оборудование
 - `PATCH /api/equipment/{id}/` - обновить оборудование
 
 ### Tasks (Задачи)
+
 - `GET /api/tasks/` - все задачи
 - `POST /api/tasks/` - создать задачу
 - `PATCH /api/tasks/{id}/` - обновить задачу
@@ -168,15 +191,18 @@ factory-project/
 - `POST /api/tasks/{id}/add_comment/` - добавить комментарий
 
 ### Comments (Комментарии)
+
 - `GET /api/comments/` - все комментарии
 - `POST /api/comments/` - создать комментарий
 
 ### Incidents (Инциденты)
+
 - `GET /api/incidents/` - все инциденты
 - `POST /api/incidents/` - сообщить об инциденте
 - `POST /api/incidents/{id}/resolve/` - разрешить инцидент
 
 ### Messages (Сообщения)
+
 - `GET /api/messages/` - все сообщения
 - `POST /api/messages/` - отправить сообщение
 - `GET /api/messages/received/` - полученные сообщения
@@ -185,7 +211,9 @@ factory-project/
 ## 🎯 Функционал по ролям
 
 ### Администратор (ADMIN)
+
 Полный доступ ко всем функциям:
+
 - 📊 Просмотр информационной панели и аналитики
 - ✏️ Создание и редактирование задач
 - 🔧 Управление оборудованием
@@ -194,7 +222,9 @@ factory-project/
 - 💬 Обмен сообщениями
 
 ### Рабочий (WORKER)
+
 Ограниченный доступ:
+
 - 📋 Просмотр назначенных задач
 - ✅ Отметить задачу как выполненную
 - 💬 Добавлять комментарии к задачам
@@ -203,6 +233,7 @@ factory-project/
 - 📧 Обмен сообщениями с другими сотрудниками
 
 ### Django
+
 ```bash
 # Создать новую миграцию
 python manage.py makemigrations
@@ -221,6 +252,7 @@ python manage.py migrate api zero
 ```
 
 ### npm
+
 ```bash
 # Собрать проект для production
 npm run build

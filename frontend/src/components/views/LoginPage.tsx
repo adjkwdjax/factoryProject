@@ -73,7 +73,7 @@ export function LoginPage() {
             <span className="text-3xl font-bold text-white">PT</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Production Tasks</h1>
-          <p className="text-slate-500 text-sm uppercase tracking-widest">Система управления производством</p>
+          <p className="text-slate-500 text-sm uppercase tracking-widest">Информационная система управления задачами</p>
         </div>
 
         {/* Форма входа */}

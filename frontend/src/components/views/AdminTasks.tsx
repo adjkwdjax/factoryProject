@@ -6,7 +6,7 @@ import { api } from '../../services/api';
 import { Task, User } from '../../lib/mockData';
 import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
-import { MessageSquare, Plus, Trash2, Edit2 } from 'lucide-react';
+import { Clock, MessageSquare, Plus, Trash2, Edit2 } from 'lucide-react';
 
 export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
   const { currentUser } = useAuth();
@@ -134,10 +134,21 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
                     <p className={`text-xs mt-1.5 ${isCompleted ? 'text-slate-600' : 'text-slate-600'}`}>
                       {task.description}
                     </p>
-                    <div className="flex gap-4 mt-3">
+                    <div className="flex flex-wrap gap-4 mt-3">
                       <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
                         <Edit2 className="w-3 h-3" /> {assignee?.name || 'Неизвестно'}
                       </span>
+                      <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
+                        <Clock className="w-3 h-3" /> До: {format(new Date(task.dueDate), 'dd.MM.yyyy HH:mm')}
+                      </span>
+                      <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
+                        <Clock className="w-3 h-3" /> Время: {task.durationHours ?? 1} ч
+                      </span>
+                      {isCompleted && task.completedAt && (
+                        <span className="text-[10px] flex items-center gap-1.5 text-green-600 font-medium">
+                          <Clock className="w-3 h-3" /> Выполнена: {format(new Date(task.completedAt), 'dd.MM.yyyy HH:mm')}
+                        </span>
+                      )}
                       {task.comments.length > 0 && (
                         <span className="text-[10px] flex items-center gap-1.5 text-slate-600 font-medium">
                           <MessageSquare className="w-3 h-3" /> Коммент: {task.comments.length}

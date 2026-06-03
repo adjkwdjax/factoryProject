@@ -280,6 +280,26 @@ export const api = {
     });
   },
 
+  updateEquipment: async (id: string, updates: Partial<Equipment> & { photoFile?: File | null }): Promise<Equipment> => {
+    const formData = new FormData();
+    if (updates.name !== undefined) formData.append('name', updates.name);
+    if (updates.expirationDate !== undefined) formData.append('expirationDate', updates.expirationDate);
+    if (updates.status !== undefined) formData.append('status', updates.status);
+    if (updates.departmentId !== undefined) formData.append('department_id', updates.departmentId);
+    if (updates.photoFile) formData.append('photo', updates.photoFile);
+
+    return fetchData(`${API_BASE_URL}/equipment/${id}/`, {
+      method: 'PATCH',
+      body: formData,
+    });
+  },
+
+  deleteEquipment: async (id: string): Promise<void> => {
+    await fetchData(`${API_BASE_URL}/equipment/${id}/`, {
+      method: 'DELETE',
+    });
+  },
+
   // Tasks
   getTasks: async (): Promise<Task[]> => {
     const data = await fetchData(`${API_BASE_URL}/tasks/`);
