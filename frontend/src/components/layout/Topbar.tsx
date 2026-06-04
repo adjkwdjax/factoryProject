@@ -1,7 +1,7 @@
 import { useAuth } from '../../context/AuthContext';
-import { Flame, LogOut, UserIcon, Bell, CheckSquare, AlertOctagon, X } from 'lucide-react';
+import { Flame, LogOut, UserIcon, Bell, CheckSquare, AlertOctagon, MessageSquare, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { Equipment, Incident, Task, User } from '../../lib/mockData';
+import { Equipment, Incident, Message, Task, User } from '../../lib/mockData';
 import { api } from '../../services/api';
 import Popup from '../ui/Popup';
 import { formatLocalDateTime } from '../../lib/dateTime';
@@ -12,7 +12,7 @@ type TopbarProps = {
 
 type NotificationItem = {
   id: string;
-  type: 'TASK' | 'INCIDENT';
+  type: 'TASK' | 'INCIDENT' | 'MESSAGE';
   title: string;
   body: string;
   timestamp: string;
@@ -27,49 +27,55 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
   const [isNotificationsPopupOpen, setIsNotificationsPopupOpen] = useState(false);
   const knownIncidentIds = useRef<Set<string>>(new Set());
   const knownTaskIds = useRef<Set<string>>(new Set());
+  const knownMessageIds = useRef<Set<string>>(new Set());
   const hasLoadedNotifications = useRef(false);
 
   useEffect(() => {
     if (!currentUser) return;
     knownIncidentIds.current = new Set();
     knownTaskIds.current = new Set();
+    knownMessageIds.current = new Set();
     hasLoadedNotifications.current = false;
 
-    const isRelevantTask = (task: Task, userList: User[]) => {
-      if (currentUser.role === 'ADMIN') return true;
-      if (currentUser.role === 'WORKER') return task.assigneeId === currentUser.id;
-
-      const assignee = userList.find(user => user.id === task.assigneeId);
-      return assignee?.departmentId === currentUser.departmentId;
+    const isRelevantTask = (task: Task) => {
+      return task.assigneeId === currentUser.id && task.creatorId !== currentUser.id;
     };
 
     const isRelevantIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
+      if (incident.reporterId === currentUser.id) return false;
       if (currentUser.role === 'ADMIN') return true;
-      if (incident.reporterId === currentUser.id) return true;
 
       const reporter = userList.find(user => user.id === incident.reporterId);
       const relatedEquipment = equipmentList.find(eq => eq.id === incident.equipmentId);
       return reporter?.departmentId === currentUser.departmentId || relatedEquipment?.departmentId === currentUser.departmentId;
     };
 
+    const isRelevantMessage = (message: Message) => {
+      return message.receiverId === currentUser.id && message.senderId !== currentUser.id;
+    };
+
     const fetchAlerts = async () => {
-      const [allIncidents, allTasks, allUsers, allEquipment] = await Promise.all([
+      const [allIncidents, allTasks, allMessages, allUsers, allEquipment] = await Promise.all([
         api.getIncidents(),
         api.getTasks(),
+        api.getMessages(),
         api.getUsers(),
         api.getEquipment(),
       ]);
 
       const relevantIncidents = allIncidents.filter(incident => isRelevantIncident(incident, allUsers, allEquipment));
-      const relevantTasks = allTasks.filter(task => isRelevantTask(task, allUsers));
+      const relevantTasks = allTasks.filter(isRelevantTask);
+      const relevantMessages = allMessages.filter(isRelevantMessage);
       setIncidents(relevantIncidents.filter(i => i.status === 'OPEN'));
 
       const nextIncidentIds = new Set(relevantIncidents.map(incident => incident.id));
       const nextTaskIds = new Set(relevantTasks.map(task => task.id));
+      const nextMessageIds = new Set(relevantMessages.map(message => message.id));
 
       if (!hasLoadedNotifications.current) {
         knownIncidentIds.current = nextIncidentIds;
         knownTaskIds.current = nextTaskIds;
+        knownMessageIds.current = nextMessageIds;
         hasLoadedNotifications.current = true;
         return;
       }
@@ -96,13 +102,28 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
           unread: true,
         }));
 
-      const freshNotifications = [...newIncidentNotifications, ...newTaskNotifications];
+      const newMessageNotifications = relevantMessages
+        .filter(message => !knownMessageIds.current.has(message.id))
+        .map(message => {
+          const sender = allUsers.find(user => user.id === message.senderId);
+          return {
+            id: `message-${message.id}`,
+            type: 'MESSAGE' as const,
+            title: 'Вам пришло новое сообщение',
+            body: `${sender?.name || 'Неизвестно'}: ${message.text}`,
+            timestamp: message.timestamp,
+            unread: true,
+          };
+        });
+
+      const freshNotifications = [...newIncidentNotifications, ...newTaskNotifications, ...newMessageNotifications];
       if (freshNotifications.length > 0) {
         setNotifications(prev => [...freshNotifications, ...prev].slice(0, 12));
       }
 
       knownIncidentIds.current = nextIncidentIds;
       knownTaskIds.current = nextTaskIds;
+      knownMessageIds.current = nextMessageIds;
     };
 
     fetchAlerts();
@@ -204,11 +225,13 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
               <p className="text-sm text-slate-500">Новых уведомлений пока нет.</p>
             ) : (
               notifications.map(notification => {
-                const Icon = notification.type === 'TASK' ? CheckSquare : AlertOctagon;
+                const Icon = notification.type === 'TASK' ? CheckSquare : notification.type === 'MESSAGE' ? MessageSquare : AlertOctagon;
+                const toneClass = notification.type === 'TASK' ? 'bg-amber-50 border-amber-200' : notification.type === 'MESSAGE' ? 'bg-sky-50 border-sky-200' : 'bg-red-50 border-red-200';
+                const iconClass = notification.type === 'TASK' ? 'bg-amber-100 text-amber-700' : notification.type === 'MESSAGE' ? 'bg-sky-100 text-sky-700' : 'bg-red-100 text-red-700';
                 return (
-                  <div key={notification.id} className={`p-4 rounded-xl border ${notification.type === 'TASK' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
+                  <div key={notification.id} className={`p-4 rounded-xl border ${toneClass}`}>
                     <div className="flex items-start gap-3">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${notification.type === 'TASK' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -236,11 +259,13 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
 
       <div className="fixed right-5 bottom-5 z-[1100] space-y-3 pointer-events-none">
         {notifications.filter(notification => notification.unread).slice(0, 3).map(notification => {
-          const Icon = notification.type === 'TASK' ? CheckSquare : AlertOctagon;
+          const Icon = notification.type === 'TASK' ? CheckSquare : notification.type === 'MESSAGE' ? MessageSquare : AlertOctagon;
+          const borderClass = notification.type === 'TASK' ? 'border-amber-200' : notification.type === 'MESSAGE' ? 'border-sky-200' : 'border-red-200';
+          const iconClass = notification.type === 'TASK' ? 'bg-amber-100 text-amber-700' : notification.type === 'MESSAGE' ? 'bg-sky-100 text-sky-700' : 'bg-red-100 text-red-700';
           return (
-            <div key={notification.id} className={`pointer-events-auto w-80 p-4 rounded-xl border shadow-lg bg-white ${notification.type === 'TASK' ? 'border-amber-200' : 'border-red-200'}`}>
+            <div key={notification.id} className={`pointer-events-auto w-80 p-4 rounded-xl border shadow-lg bg-white ${borderClass}`}>
               <div className="flex items-start gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${notification.type === 'TASK' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0 flex-1">

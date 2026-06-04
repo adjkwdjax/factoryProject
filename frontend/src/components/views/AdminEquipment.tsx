@@ -255,7 +255,7 @@ export function AdminEquipment() {
                       <div>
                         <div className="font-semibold text-slate-900 text-sm">{eq.name}</div>
                         <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
-                          Локация: {dept?.name || 'Неизвестно'} • Истекает: {format(new Date(eq.expirationDate), 'dd.MM.yyyy')}
+                          Локация: {dept?.name || 'Неизвестно'} • Окончание срока эксплуатации: {format(new Date(eq.expirationDate), 'dd.MM.yyyy')}
                         </div>
                       </div>
                     </div>
