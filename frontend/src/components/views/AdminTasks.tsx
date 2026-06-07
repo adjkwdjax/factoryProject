@@ -101,8 +101,8 @@ export function AdminTasks({ showHistory = false }: { showHistory?: boolean }) {
     : tasks;
 
   const availableWorkers = currentUser?.role === 'DEPARTMENT_HEAD'
-    ? users.filter(user => user.role === 'WORKER' && user.departmentId === currentUser.departmentId)
-    : users.filter(user => user.role === 'WORKER');
+    ? users.filter(user => user.departmentId === currentUser.departmentId)
+    : users;
 
   const filteredTasks = visibleTasks.filter(task => showHistory ? task.status === 'COMPLETED' : task.status === 'PENDING');
 

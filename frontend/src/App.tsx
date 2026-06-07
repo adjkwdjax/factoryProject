@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { LoginPage } from './components/views/LoginPage';
@@ -13,14 +13,23 @@ import { MessagesView } from './components/views/Messages';
 
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
-  
-
   const [currentNav, setCurrentNav] = useState('');
 
+  useEffect(() => {
+    if (!currentUser) {
+      setCurrentNav('');
+      return;
+    }
 
-  if (!currentNav && currentUser) {
-    setCurrentNav(currentUser.role === 'WORKER' ? 'my-tasks' : 'dashboard');
-  }
+    const workerNav = ['my-tasks', 'my-tasks-history', 'equipment-status', 'messages', 'report-incident'];
+    const adminNav = ['dashboard', 'tasks', 'tasks-history', 'equipment', 'users', 'messages', 'incidents'];
+    const allowedNav = currentUser.role === 'WORKER' ? workerNav : adminNav;
+    const defaultNav = currentUser.role === 'WORKER' ? 'my-tasks' : 'dashboard';
+
+    if (!currentNav || !allowedNav.includes(currentNav)) {
+      setCurrentNav(defaultNav);
+    }
+  }, [currentUser, currentNav]);
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">Загрузка портала завода...</div>;
@@ -64,4 +73,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-

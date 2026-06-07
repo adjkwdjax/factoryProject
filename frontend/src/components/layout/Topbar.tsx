@@ -38,11 +38,15 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
     hasLoadedNotifications.current = false;
 
     const isRelevantTask = (task: Task) => {
-      return task.assigneeId === currentUser.id && task.creatorId !== currentUser.id;
+      return (
+        currentUser.role === 'WORKER' &&
+        String(task.assigneeId) === String(currentUser.id) &&
+        String(task.creatorId) !== String(currentUser.id)
+      );
     };
 
     const isRelevantIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
-      if (incident.reporterId === currentUser.id) return false;
+      if (String(incident.reporterId) === String(currentUser.id)) return false;
       if (currentUser.role === 'ADMIN') return true;
 
       const reporter = userList.find(user => user.id === incident.reporterId);
@@ -51,7 +55,7 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
     };
 
     const isRelevantMessage = (message: Message) => {
-      return message.receiverId === currentUser.id && message.senderId !== currentUser.id;
+      return String(message.receiverId) === String(currentUser.id) && String(message.senderId) !== String(currentUser.id);
     };
 
     const fetchAlerts = async () => {
