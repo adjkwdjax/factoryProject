@@ -45,13 +45,16 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
       );
     };
 
-    const isRelevantIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
-      if (String(incident.reporterId) === String(currentUser.id)) return false;
+    const isVisibleIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
       if (currentUser.role === 'ADMIN') return true;
 
       const reporter = userList.find(user => user.id === incident.reporterId);
       const relatedEquipment = equipmentList.find(eq => eq.id === incident.equipmentId);
       return reporter?.departmentId === currentUser.departmentId || relatedEquipment?.departmentId === currentUser.departmentId;
+    };
+
+    const isNotifiableIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
+      return String(incident.reporterId) !== String(currentUser.id) && isVisibleIncident(incident, userList, equipmentList);
     };
 
     const isRelevantMessage = (message: Message) => {
@@ -67,12 +70,13 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
         api.getEquipment(),
       ]);
 
-      const relevantIncidents = allIncidents.filter(incident => isRelevantIncident(incident, allUsers, allEquipment));
+      const visibleIncidents = allIncidents.filter(incident => isVisibleIncident(incident, allUsers, allEquipment));
+      const notifiableIncidents = allIncidents.filter(incident => isNotifiableIncident(incident, allUsers, allEquipment));
       const relevantTasks = allTasks.filter(isRelevantTask);
       const relevantMessages = allMessages.filter(isRelevantMessage);
-      setIncidents(relevantIncidents.filter(i => i.status === 'OPEN'));
+      setIncidents(visibleIncidents.filter(i => i.status === 'OPEN'));
 
-      const nextIncidentIds = new Set(relevantIncidents.map(incident => incident.id));
+      const nextIncidentIds = new Set(notifiableIncidents.map(incident => incident.id));
       const nextTaskIds = new Set(relevantTasks.map(task => task.id));
       const nextMessageIds = new Set(relevantMessages.map(message => message.id));
 
@@ -84,7 +88,7 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
         return;
       }
 
-      const newIncidentNotifications = relevantIncidents
+      const newIncidentNotifications = notifiableIncidents
         .filter(incident => !knownIncidentIds.current.has(incident.id))
         .map(incident => ({
           id: `incident-${incident.id}`,
