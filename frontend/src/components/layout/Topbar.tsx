@@ -45,12 +45,8 @@ export function Topbar({ onOpenIncidentReport }: TopbarProps) {
       );
     };
 
-    const isVisibleIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {
-      if (currentUser.role === 'ADMIN') return true;
-
-      const reporter = userList.find(user => user.id === incident.reporterId);
-      const relatedEquipment = equipmentList.find(eq => eq.id === incident.equipmentId);
-      return reporter?.departmentId === currentUser.departmentId || relatedEquipment?.departmentId === currentUser.departmentId;
+    const isVisibleIncident = () => {
+      return true;
     };
 
     const isNotifiableIncident = (incident: Incident, userList: User[], equipmentList: Equipment[]) => {

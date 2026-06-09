@@ -235,6 +235,9 @@ factory-project/
 ### Django
 
 ```bash
+# Прогнать backend-тесты для отчета
+docker compose exec backend python manage.py test api -v 2
+
 # Создать новую миграцию
 python manage.py makemigrations
 
